@@ -1,0 +1,75 @@
+services:
+  # ── MediKiosk FastAPI Backend ───────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medikiosk-backend
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-kiosk-secret-key-change-in-production-32char}
+      - REDIS_URL=redis://redis:6379/0
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-llama3-8b-8192}
+      - BHASHINI_API_KEY=${BHASHINI_API_KEY}
+      - BHASHINI_USER_ID=${BHASHINI_USER_ID}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME:-medikiosk-ontology}
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - DOCUMENT_AI_PROCESSOR_ID=${DOCUMENT_AI_PROCESSOR_ID}
+      - ABDM_HIS_ENDPOINT=${ABDM_HIS_ENDPOINT:-}
+      - SESSION_TTL_SECONDS=900
+      - MAX_SESSION_MS=180000
+    volumes:
+      - bundle_data:/app/data/bundles
+      - audit_data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - medikiosk-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Redis Ephemeral State & Pub/Sub ────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: medikiosk-redis
+    restart: unless-stopped
+    command: redis-server --appendonly no --save "" --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - medikiosk-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Nginx Edge Reverse Proxy & Rate Limiter ─────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: medikiosk-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - medikiosk-net
+
+volumes:
+  bundle_data:
+    driver: local
+  audit_data:
+    driver: local
+
+networks:
+  medikiosk-net:
+    driver: bridge

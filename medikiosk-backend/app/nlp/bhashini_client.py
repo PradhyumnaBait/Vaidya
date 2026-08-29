@@ -120,22 +120,38 @@ async def transcribe_audio(
         # Parse Bhashini pipeline output format
         output = data.get("pipelineResponse", [{}])[0]
         output_data = output.get("output", [{}])[0]
-        transcript = output_data.get("source", "")
+        transcript = output_data.get("source", "").strip()
 
-        # Bhashini does not always return confidence; we compute a proxy
-        # based on the response quality flag if available
-        confidence_raw = output_data.get("confidence", None)
-        if confidence_raw is not None:
-            confidence = float(confidence_raw)
-        else:
-            # Heuristic: if transcript is non-empty and >= 2 words, assign 0.75
-            words = transcript.strip().split()
-            confidence = 0.75 if len(words) >= 2 else 0.55
+        # 1. Check for native confidence from Bhashini / AI4Bharat
+        confidence = None
+        if "confidence" in output_data and output_data["confidence"] is not None:
+            confidence = float(output_data["confidence"])
+        elif "score" in output_data and output_data["score"] is not None:
+            confidence = float(output_data["score"])
+        elif "nBestTokenLevelConfidence" in output_data:
+            # Average token-level confidence scores if present
+            token_scores = [t.get("confidence", 0.0) for t in output_data["nBestTokenLevelConfidence"] if "confidence" in t]
+            if token_scores:
+                confidence = sum(token_scores) / len(token_scores)
+
+        # 2. Informational lexical confidence proxy if upstream engine omits acoustic score
+        if confidence is None:
+            if not transcript:
+                confidence = 0.0
+            else:
+                words = transcript.split()
+                # Continuous score based on word length, vocabulary diversity, and character length
+                unique_words = len(set(words))
+                diversity_ratio = unique_words / max(len(words), 1)
+                length_factor = min(len(words) / 4.0, 1.0)  # max at 4 words
+                # Base proxy: 0.60 + up to 0.25 based on length & lexical diversity
+                confidence = 0.60 + 0.20 * length_factor + 0.10 * diversity_ratio
 
         return {
             "transcript": transcript,
-            "confidence": min(max(confidence, 0.0), 1.0),
+            "confidence": round(min(max(confidence, 0.0), 1.0), 3),
             "language": language,
+            "confidence_source": "acoustic" if output_data.get("confidence") is not None else "lexical_proxy",
         }
 
     except httpx.HTTPError as exc:

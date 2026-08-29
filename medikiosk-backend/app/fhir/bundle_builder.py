@@ -1,17 +1,18 @@
 """
 MediKiosk — FHIR R4 Bundle Builder
 
-Assembles a FHIR R4 Bundle (type: transaction) from a completed ClinicalSynthesis.
+Assembles a FHIR R4 Bundle (type: document / transaction) from a completed ClinicalSynthesis.
 
 Resources generated:
+  - Composition        (Clinical Document header with structured section references)
   - Patient            (de-identified — no PHI; uses session hash as ID)
   - Encounter          (OPD encounter with kiosk-generated identifier)
-  - Composition        (Clinical Document with section structure)
   - Condition          (Chief complaint coded with ICD-11 + NAMASTE)
+  - Observation (Dosha) (Structured Dashavidha assessment with quantitative components)
   - Observation×N      (One per LabResult with LOINC coding)
-  - QuestionnaireResponse  (Full SOCRATES + Ayush structured responses)
+  - QuestionnaireResponse (Full SOCRATES + Ayush structured responses)
   - DocumentReference  (Pointer to scanned lab document, if present)
-  - Extension          (NAMASTE/Ayush codes in custom extension)
+  - Observation (Quality) (SOCRATES completeness F1 score)
 
 Compliant with:
   - FHIR R4 (HL7 v4.0.1)
@@ -20,15 +21,15 @@ Compliant with:
 """
 from __future__ import annotations
 
+import logging
 import time
 import uuid
-import logging
 from typing import Any
 
 from app.models.clinical import (
+    AnomalyStatus,
     ClinicalSynthesis,
     LabResult,
-    AnomalyStatus,
 )
 
 logger = logging.getLogger(__name__)
@@ -171,14 +172,87 @@ def _build_condition(synthesis: ClinicalSynthesis, patient_ref: str, encounter_r
     }
 
 
+def _build_dosha_observation(
+    synthesis: ClinicalSynthesis,
+    patient_ref: str,
+    encounter_ref: str,
+) -> dict[str, Any] | None:
+    """Structured Observation for Dashavidha / Dosha Imbalance Vector & Agni/Koshtha."""
+    a = synthesis.ayush
+    if not a or not a.dosha_vector:
+        return None
+
+    dv = a.dosha_vector
+    components = [
+        {
+            "code": {"coding": [{"system": f"{ABDM_SYSTEM}/CodeSystem/AyushDosha", "code": "VATA", "display": "Vata Score"}]},
+            "valueQuantity": {"value": round(dv.vata, 2), "unit": "score", "system": "http://unitsofmeasure.org"},
+        },
+        {
+            "code": {"coding": [{"system": f"{ABDM_SYSTEM}/CodeSystem/AyushDosha", "code": "PITTA", "display": "Pitta Score"}]},
+            "valueQuantity": {"value": round(dv.pitta, 2), "unit": "score", "system": "http://unitsofmeasure.org"},
+        },
+        {
+            "code": {"coding": [{"system": f"{ABDM_SYSTEM}/CodeSystem/AyushDosha", "code": "KAPHA", "display": "Kapha Score"}]},
+            "valueQuantity": {"value": round(dv.kapha, 2), "unit": "score", "system": "http://unitsofmeasure.org"},
+        },
+    ]
+
+    if a.agni:
+        agni_val = a.agni.value if hasattr(a.agni, "value") else str(a.agni)
+        components.append({
+            "code": {"coding": [{"system": f"{ABDM_SYSTEM}/CodeSystem/AyushPariksha", "code": "AGNI", "display": "Agni Pariksha"}]},
+            "valueString": agni_val,
+        })
+
+    if a.koshtha:
+        koshtha_val = a.koshtha.value if hasattr(a.koshtha, "value") else str(a.koshtha)
+        components.append({
+            "code": {"coding": [{"system": f"{ABDM_SYSTEM}/CodeSystem/AyushPariksha", "code": "KOSHTHA", "display": "Koshtha Pariksha"}]},
+            "valueString": koshtha_val,
+        })
+
+    dom_label = dv.dominant_label.value if hasattr(dv.dominant_label, "value") else str(dv.dominant_label)
+    return {
+        "resourceType": "Observation",
+        "id": _uuid(),
+        "status": "final",
+        "category": [
+            {
+                "coding": [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                        "code": "exam",
+                        "display": "Exam"
+                    }
+                ]
+            }
+        ],
+        "code": {
+            "coding": [
+                {
+                    "system": f"{ABDM_SYSTEM}/CodeSystem/AyushClinicalAssessment",
+                    "code": "DOSHA-VIKRITI-VECTOR",
+                    "display": "Dosha Imbalance Vector Assessment"
+                }
+            ],
+            "text": f"Vikriti: {dom_label}"
+        },
+        "subject": {"reference": patient_ref},
+        "encounter": {"reference": encounter_ref},
+        "effectiveDateTime": synthesis.generated_at,
+        "valueString": dom_label,
+        "component": components,
+        "note": [{"text": dv.disclaimer}],
+    }
+
+
 def _build_lab_observation(
     lab: LabResult,
     patient_ref: str,
     encounter_ref: str,
 ) -> dict[str, Any]:
     """FHIR Observation for a single lab result."""
-
-    # Map anomaly status to FHIR interpretation code
     interpretation_map = {
         AnomalyStatus.NORMAL: ("N", "Normal"),
         AnomalyStatus.HIGH: ("H", "High"),
@@ -301,22 +375,25 @@ def _build_questionnaire_response(
 
     # Ayush items
     if a.agni:
+        agni_str = a.agni.value if hasattr(a.agni, "value") else str(a.agni)
         items.append({
             "linkId": "ayush.agni",
             "text": "Agni (Digestive Fire)",
-            "answer": [{"valueString": a.agni}],
+            "answer": [{"valueString": agni_str}],
         })
     if a.koshtha:
+        koshtha_str = a.koshtha.value if hasattr(a.koshtha, "value") else str(a.koshtha)
         items.append({
             "linkId": "ayush.koshtha",
             "text": "Koshtha (Bowel Nature)",
-            "answer": [{"valueString": a.koshtha}],
+            "answer": [{"valueString": koshtha_str}],
         })
     if a.dosha_vector:
+        dom_str = a.dosha_vector.dominant_label.value if hasattr(a.dosha_vector.dominant_label, "value") else str(a.dosha_vector.dominant_label)
         items.append({
             "linkId": "ayush.vikriti",
             "text": "Vikriti (Dosha Imbalance Tendency)",
-            "answer": [{"valueString": a.dosha_vector.dominant_label}],
+            "answer": [{"valueString": dom_str}],
         })
 
     return {
@@ -370,36 +447,161 @@ def _build_completeness_observation(
     }
 
 
+def _build_composition(
+    synthesis: ClinicalSynthesis,
+    patient_ref: str,
+    encounter_ref: str,
+    condition_ref: str,
+    qr_ref: str,
+    dosha_ref: str | None,
+    lab_refs: list[str],
+) -> dict[str, Any]:
+    """Clinical Document Composition linking all resources into a coherent ABDM document."""
+    sections = [
+        {
+            "title": "Chief Complaint & History of Presenting Illness (SOCRATES)",
+            "code": {
+                "coding": [
+                    {
+                        "system": SNOMED_SYSTEM,
+                        "code": "108341000119107",
+                        "display": "Chief complaint narrative"
+                    }
+                ]
+            },
+            "entry": [{"reference": condition_ref}, {"reference": qr_ref}],
+        }
+    ]
+
+    if dosha_ref:
+        sections.append({
+            "title": "Ayush Clinical Assessment (Dashavidha Pariksha)",
+            "code": {
+                "coding": [
+                    {
+                        "system": f"{ABDM_SYSTEM}/CodeSystem/DocumentSection",
+                        "code": "AYUSH-ASSESSMENT",
+                        "display": "Ayush Clinical Evaluation"
+                    }
+                ]
+            },
+            "entry": [{"reference": dosha_ref}],
+        })
+
+    if lab_refs:
+        sections.append({
+            "title": "Diagnostic Laboratory Results",
+            "code": {
+                "coding": [
+                    {
+                        "system": SNOMED_SYSTEM,
+                        "code": "4241000179101",
+                        "display": "Laboratory report"
+                    }
+                ]
+            },
+            "entry": [{"reference": lr} for lr in lab_refs],
+        })
+
+    return {
+        "resourceType": "Composition",
+        "id": _uuid(),
+        "status": "final",
+        "type": {
+            "coding": [
+                {
+                    "system": SNOMED_SYSTEM,
+                    "code": "371530004",
+                    "display": "Clinical consultation report"
+                }
+            ]
+        },
+        "category": [
+            {
+                "coding": [
+                    {
+                        "system": "http://loinc.org",
+                        "code": "11488-4",
+                        "display": "Consultation note"
+                    }
+                ]
+            }
+        ],
+        "subject": {"reference": patient_ref},
+        "encounter": {"reference": encounter_ref},
+        "date": synthesis.generated_at,
+        "author": [
+            {
+                "display": "MediKiosk Autonomous Intake Station v1.0"
+            }
+        ],
+        "title": f"OPD Intake Summary — {synthesis.chief_complaint[:50]}",
+        "section": sections,
+    }
+
+
 # ── Main Bundle Builder ────────────────────────────────────────────────────────
 
 def build_fhir_bundle(synthesis: ClinicalSynthesis) -> dict[str, Any]:
     """
     Assemble the complete FHIR R4 Bundle from a ClinicalSynthesis.
 
-    Returns a FHIR transaction Bundle ready for submission to the HIS endpoint.
+    Returns a FHIR document transaction Bundle ready for submission to the HIS endpoint.
     """
     bundle_id = _uuid()
     patient = _build_patient(synthesis)
     patient_ref = f"Patient/{patient['id']}"
+
     encounter = _build_encounter(synthesis, patient_ref)
     encounter_ref = f"Encounter/{encounter['id']}"
+
     condition = _build_condition(synthesis, patient_ref, encounter_ref)
+    condition_ref = f"Condition/{condition['id']}"
+
     qr = _build_questionnaire_response(synthesis, patient_ref, encounter_ref)
+    qr_ref = f"QuestionnaireResponse/{qr['id']}"
+
+    # Structured Dosha Observation
+    dosha_obs = _build_dosha_observation(synthesis, patient_ref, encounter_ref)
+    dosha_ref = f"Observation/{dosha_obs['id']}" if dosha_obs else None
+
+    # Lab Observations
+    lab_entries = []
+    lab_refs = []
+    for lab in synthesis.lab_results:
+        obs = _build_lab_observation(lab, patient_ref, encounter_ref)
+        lab_ref = f"Observation/{obs['id']}"
+        lab_refs.append(lab_ref)
+        lab_entries.append({"resource": obs, "request": {"method": "POST", "url": "Observation"}})
+
+    # Quality metric observation
+    quality_obs = _build_completeness_observation(synthesis, patient_ref)
+
+    # Composition header referencing child resources
+    composition = _build_composition(
+        synthesis,
+        patient_ref,
+        encounter_ref,
+        condition_ref,
+        qr_ref,
+        dosha_ref,
+        lab_refs,
+    )
+    composition_ref = f"Composition/{composition['id']}"
 
     entries = [
+        {"resource": composition, "request": {"method": "POST", "url": "Composition"}},
         {"resource": patient, "request": {"method": "PUT", "url": patient_ref}},
         {"resource": encounter, "request": {"method": "POST", "url": "Encounter"}},
         {"resource": condition, "request": {"method": "POST", "url": "Condition"}},
         {"resource": qr, "request": {"method": "POST", "url": "QuestionnaireResponse"}},
     ]
 
-    # Lab Observations
-    for lab in synthesis.lab_results:
-        obs = _build_lab_observation(lab, patient_ref, encounter_ref)
-        entries.append({"resource": obs, "request": {"method": "POST", "url": "Observation"}})
+    if dosha_obs:
+        entries.append({"resource": dosha_obs, "request": {"method": "POST", "url": "Observation"}})
 
-    # Quality metric observation
-    quality_obs = _build_completeness_observation(synthesis, patient_ref)
+    entries.extend(lab_entries)
+
     if quality_obs:
         entries.append({"resource": quality_obs, "request": {"method": "POST", "url": "Observation"}})
 
@@ -409,13 +611,13 @@ def build_fhir_bundle(synthesis: ClinicalSynthesis) -> dict[str, Any]:
         "meta": {
             "profile": [f"{ABDM_SYSTEM}/StructureDefinition/MediKioskBundle"]
         },
-        "type": "transaction",
+        "type": "document",
         "timestamp": _now_iso(),
         "entry": entries,
     }
 
     logger.info(
-        "FHIR Bundle %s built: %d entries for session_hash=%s",
+        "FHIR Document Bundle %s built: %d entries for session_hash=%s",
         bundle_id[:8], len(entries), synthesis.session_hash[:12],
     )
     return bundle

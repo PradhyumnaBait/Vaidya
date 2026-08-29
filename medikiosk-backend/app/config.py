@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     )
 
     # ── Core ──────────────────────────────────────────────────────────────────
-    app_env: Literal["development", "production"] = "development"
+    # "test" is used by the pytest conftest to prevent real I/O during unit tests.
+    app_env: Literal["development", "production", "test"] = "development"
     secret_key: str = "INSECURE-CHANGE-IN-PRODUCTION-32+"
     session_ttl_seconds: int = 900
 
@@ -26,9 +27,10 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     # ── Audit Database ────────────────────────────────────────────────────────
-    audit_database_url: str = (
-        "postgresql+asyncpg://medikiosk:medikiosk@localhost:5432/medikiosk_audit"
-    )
+    # Optional Postgres URL for persistent DPDP audit log.
+    # If empty, audit events are written to data/audit_log.jsonl (file fallback).
+    # Full Postgres support: set AUDIT_DATABASE_URL and run alembic migrations.
+    audit_database_url: str = ""    # empty = use file-backed audit log
 
     # ── LLM / Groq ────────────────────────────────────────────────────────────
     groq_api_key: str = ""
@@ -61,7 +63,9 @@ class Settings(BaseSettings):
     document_ai_location: str = "us"
 
     # ── Hospital HIS / ABDM ───────────────────────────────────────────────────
-    his_endpoint: str = "http://localhost:9000/api/fhir"
+    # Set ABDM_HIS_ENDPOINT to a real URL to enable live transmission;
+    # leave empty for file-only persistence (suitable for hackathon demo).
+    abdm_his_endpoint: str = ""                    # empty = skip HTTP forward
     abdm_mock: bool = True
 
     # ── Triage Pub/Sub ────────────────────────────────────────────────────────

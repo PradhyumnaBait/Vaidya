@@ -54,9 +54,11 @@ from app.documents.lab_extractor import extract_lab_results
 from app.documents.ocr_pipeline import classify_document, process_document
 from app.documents.temporal_normalizer import extract_report_date, sort_timelines
 from app.fhir.synthesis_engine import synthesise, build_emr_dashboard
+from app.fhir.abdm_gateway import persist_and_transmit
 from app.models.clinical import LabResult
 from app.models.session import BeliefState, SessionFSMState
 from app.nlp.bhashini_client import transcribe_audio, synthesise_speech
+from app.nlp.rag_translator import translate_entity
 from app.scoring.red_flag_interceptor import evaluate_red_flags
 
 logger = logging.getLogger(__name__)
@@ -81,6 +83,7 @@ async def session_websocket(websocket: WebSocket):
     fsm: ClinicalStateMachine | None = None
     arbiter = ArbitrationEngine()
     lab_results: list[LabResult] = []
+    _synthesis_transmitted = False  # Track actual transmission for teardown
 
     try:
         # ── Initial handshake ─────────────────────────────────────────────────
@@ -153,24 +156,33 @@ async def session_websocket(websocket: WebSocket):
                 await _send_error(websocket, "Consent not yet granted.", "consent_first")
                 continue
 
-            # ── Touch Input ───────────────────────────────────────────────────
+            # ── HMAC verification for all clinical input messages ─────────────
+            if msg_type in ("touch_input", "voice_final", "document_image", "request_synthesis"):
+                hmac_ok = _verify_message_hmac(raw, session_id)
+                if not hmac_ok:
+                    logger.warning(
+                        "HMAC mismatch on msg_type=%s session=%s — terminating.",
+                        msg_type, session_id[:8],
+                    )
+                    await _send_error(websocket, "Message signature invalid. Session terminated.", "hmac_invalid")
+                    break
+
+            # ── Touch Input (Preempts any in-flight voice processing) ─────────
             if msg_type == "touch_input":
                 slot_id = raw.get("slot_id", "")
                 value = raw.get("value", "")
                 arbiter.register_touch(value, slot_id)
-                # Immediately close the arbitration window via TOUCH_LOCK
+                # Immediately process touch input (TOUCH_LOCK semantics)
                 await _process_touch(
                     websocket, fsm, state, arbiter, language, slot_id, value, lab_results
                 )
                 continue
 
-            # ── Voice Chunk (streaming) ───────────────────────────────────────
+            # ── Voice Chunk (ambient noise telemetry) ─────────────────────────
             if msg_type == "voice_chunk":
                 audio_b64 = raw.get("audio_b64", "")
                 rms_db = float(raw.get("rms_db", 70.0))
                 arbiter.update_ambient_noise(rms_db)
-                # Non-blocking: chunk is streamed to Bhashini; final result arrives later
-                # (Voice-final event carries the complete transcription)
                 continue
 
             # ── Voice Final (end of utterance) ───────────────────────────────
@@ -194,6 +206,7 @@ async def session_websocket(websocket: WebSocket):
             # ── Manual Synthesis Trigger ──────────────────────────────────────
             if msg_type == "request_synthesis" or fsm.is_budget_exhausted():
                 await _run_synthesis(websocket, fsm, state, language, lab_results, session_id)
+                _synthesis_transmitted = True
                 break  # Session concludes
 
     except WebSocketDisconnect:
@@ -205,9 +218,15 @@ async def session_websocket(websocket: WebSocket):
 
     finally:
         # ── Guaranteed session teardown ────────────────────────────────────────
+        # payload_transmitted reflects whether synthesis was actually sent;
+        # it is False if consent was denied or client disconnected early.
         if state:
-            await consent_engine.record_teardown_event(session_id, payload_transmitted=True)
-            await session_manager.teardown_session(session_id, payload_transmitted=True)
+            await consent_engine.record_teardown_event(
+                session_id, payload_transmitted=_synthesis_transmitted
+            )
+            await session_manager.teardown_session(
+                session_id, payload_transmitted=_synthesis_transmitted
+            )
         try:
             if websocket.client_state == WebSocketState.CONNECTED:
                 await websocket.close()
@@ -237,9 +256,15 @@ async def _process_touch(
     )
     await fsm.advance_turn(patient_text=value, source="touch")
 
-    # Red flag check (async, non-blocking to LLM call)
+    # Concurrently: red-flag check + RAG ontology mapping (Section 2.2)
     lab_dicts = [lr.model_dump() for lr in lab_results]
-    red_flag_triggered, matched_rule = await evaluate_red_flags(state, lab_dicts)
+    (red_flag_triggered, matched_rule), rag_hit = await asyncio.gather(
+        evaluate_red_flags(state, lab_dicts),
+        translate_entity(value, language),
+    )
+
+    # Merge ontology hit into BeliefState
+    _merge_rag_hit(state, rag_hit)
 
     if red_flag_triggered and matched_rule:
         fsm.transition(SessionFSMState.RED_FLAG_TRIAGE)
@@ -308,7 +333,14 @@ async def _process_voice_final(
         return
 
     # Accepted voice input: run LLM turn for entity extraction + next question
-    llm_response = await orchestrate_turn(state, result.value, target_slot)
+    # Concurrently: LLM slot-fill + RAG ontology mapping (Section 2.2)
+    llm_response, rag_hit = await asyncio.gather(
+        orchestrate_turn(state, result.value, target_slot),
+        translate_entity(result.value, language),
+    )
+
+    # Merge ontology hit into BeliefState
+    _merge_rag_hit(state, rag_hit)
 
     # Apply extracted entities to BeliefState
     extracted = llm_response.get("extracted_entities", {})
@@ -321,10 +353,14 @@ async def _process_voice_final(
                 source="voice",
                 confidence=result.confidence,
             )
+            # Per-entity RAG lookup for the extracted value (not just full utterance)
+            if ent_data["value"] != result.value:
+                entity_hit = await translate_entity(ent_data["value"], language)
+                _merge_rag_hit(state, entity_hit)
 
     await fsm.advance_turn(patient_text=result.raw_text, source="voice")
 
-    # Red flag check
+    # Red flag check (independent — after slot fills are recorded)
     lab_dicts = [lr.model_dump() for lr in lab_results]
     red_flag_triggered, matched_rule = await evaluate_red_flags(state, lab_dicts)
     if red_flag_triggered and matched_rule:
@@ -472,14 +508,26 @@ async def _run_synthesis(
     # Build EMR dashboard
     emr_dashboard = build_emr_dashboard(synthesis, anchors)
 
-    # Send synthesis to connected physician dashboard (via WebSocket)
+    # ── Persist bundle BEFORE sending over WebSocket (Fix #2) ──────────────────
+    # This ensures the physician REST API has the data even if the WS drops.
+    fsm.transition(SessionFSMState.FHIR_TRANSMISSION)
+    persist_status = await persist_and_transmit(
+        session_hash=state.session_hash,
+        fhir_bundle=fhir_bundle,
+        emr_dashboard=emr_dashboard,
+    )
+    logger.info(
+        "Bundle persist status: file=%s redis=%s his=%s",
+        persist_status.get("file"), persist_status.get("redis"), persist_status.get("his"),
+    )
+
+    # Send synthesis to connected kiosk WebSocket
     await _send(websocket, {
         "type": "synthesis",
         "data": emr_dashboard,
     })
 
-    # Send FHIR bundle
-    fsm.transition(SessionFSMState.FHIR_TRANSMISSION)
+    # Send FHIR bundle (for kiosk-local use / logging)
     await _send(websocket, {
         "type": "synthesis_fhir",
         "bundle": fhir_bundle,
@@ -576,3 +624,77 @@ def _consent_agree_label(language: str) -> str:
 
 def _consent_deny_label(language: str) -> str:
     return {"hi": "नहीं, मैं सहमत नहीं हूँ", "mr": "नाही, मी सहमत नाही", "en": "No, I Do Not Agree"}.get(language, "No, I Do Not Agree")
+
+
+# ── RAG Hit Merger ────────────────────────────────────────────────────────────
+
+def _merge_rag_hit(state: BeliefState, hit: dict[str, Any]) -> None:
+    """
+    Merge a translate_entity() result into state.ontology_hits.
+
+    Only stores hits that crossed the RRF_THRESHOLD (hit["mapped"] == True).
+    Keeps the list sorted by confidence descending and deduplicates on NAMASTE code.
+    Also injects dosha_indicators into AyushBeliefState for downstream scoring.
+    """
+    if not hit.get("mapped"):
+        return
+
+    # Normalise into the dict shape expected by synthesis_engine
+    entry = {
+        "confidence": hit["confidence"],
+        "raw_phrase": hit.get("raw_phrase", ""),
+        "allopathic": hit.get("allopathic", {}),
+        "namaste_code": (hit.get("ayush") or {}).get("namaste_code"),
+        "icd11_tm2_code": (hit.get("ayush") or {}).get("icd11_tm2_code"),
+    }
+
+    # Deduplicate: skip if this NAMASTE code is already present
+    existing_codes = {h.get("namaste_code") for h in state.ontology_hits}
+    if entry["namaste_code"] and entry["namaste_code"] in existing_codes:
+        return
+
+    state.ontology_hits.append(entry)
+    # Keep sorted: best confidence first
+    state.ontology_hits.sort(key=lambda h: h.get("confidence", 0.0), reverse=True)
+
+    # Inject dosha indicators into AyushBeliefState for scoring engines
+    for indicator in hit.get("dosha_indicators", []):
+        if indicator and indicator not in state.ayush.dosha_indicators:
+            state.ayush.dosha_indicators.append({"tag": indicator, "confidence": hit["confidence"]})
+
+    logger.debug(
+        "RAG hit merged: NAMASTE=%s ICD11=%s conf=%.2f",
+        entry.get("namaste_code"), (entry.get("allopathic") or {}).get("icd11_code"), hit["confidence"],
+    )
+
+
+# ── HMAC Verification ─────────────────────────────────────────────────────────
+
+def _verify_message_hmac(raw: dict[str, Any], session_id: str) -> bool:
+    """
+    Verify the per-message HMAC signature.
+
+    The frontend must include:
+      { ..., "_sig": "<hmac_hex>", "_ts": <unix_ms> }
+
+    The signature covers: f"{session_id}:{msg_type}:{_ts}"
+    A missing signature is accepted in development mode (APP_ENV=development)
+    so that Postman / browser WS clients work without signing.
+
+    Per plan Section 1.1: "mismatched signatures trigger immediate session termination."
+    """
+    if settings.app_env == "development":
+        # In dev, accept unsigned messages so manual testing is friction-free
+        return True
+
+    sig = raw.get("_sig", "")
+    ts = raw.get("_ts", "")
+    msg_type = raw.get("type", "")
+
+    if not sig or not ts:
+        logger.warning("Missing HMAC fields on msg_type=%s", msg_type)
+        return False
+
+    payload_str = f"{session_id}:{msg_type}:{ts}"
+    return security.verify_hmac(payload_str, sig)
+
