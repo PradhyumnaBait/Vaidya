@@ -3,9 +3,9 @@ MediKiosk Backend — FastAPI Application Entry Point
 Initialises app, mounts routers, and manages startup/shutdown lifecycle.
 """
 import logging
+import sys
 from contextlib import asynccontextmanager
 
-import uvloop
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -21,10 +21,16 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)-8s | %(name)s — %(message)s",
 )
 
-# Install uvloop for ~40% better async throughput vs default asyncio
-uvloop.install()
+# Install uvloop for ~40% better async throughput (Linux/macOS only)
+if sys.platform != "win32":
+    try:
+        import uvloop
+        uvloop.install()
+    except ImportError:
+        pass  # uvloop is optional; fallback to standard asyncio event loop
 
 settings = get_settings()
+
 
 
 @asynccontextmanager

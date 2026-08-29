@@ -9,6 +9,7 @@ Cross-correlation rules are deterministic. They do NOT use LLMs.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 import logging
 from typing import Any
 
@@ -17,10 +18,6 @@ from app.models.clinical import AnomalyStatus, LabResult
 logger = logging.getLogger(__name__)
 
 # ── Cross-Correlation Rule Registry ──────────────────────────────────────────
-
-@dataclass_ish := (lambda: None)  # noqa — used below via standard dataclass
-
-from dataclasses import dataclass
 
 @dataclass
 class CrossCorrelationRule:

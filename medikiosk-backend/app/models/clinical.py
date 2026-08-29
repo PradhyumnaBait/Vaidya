@@ -9,6 +9,34 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
+# ── Evidence Anchor ───────────────────────────────────────────────────────────
+
+class Anchor(BaseModel):
+    """
+    Traceability record linking a clinical slot value to its evidence source.
+
+    Every slot fill during intake generates one or more Anchors, which are:
+      - Stored in AnchorRegistry (in-process, per session)
+      - Serialised into FHIR Provenance resources in the document bundle
+      - Used by EvidenceLinker to produce the physician traceability summary
+
+    Attributes:
+        slot:       SOCRATES or Dashavidha slot name (e.g., "onset", "agni").
+        raw_value:  Exactly what the patient said / touched / was parsed from OCR.
+        source:     Evidence origin: "voice" | "touch" | "ocr" | "llm".
+        confidence: Retrieval/inference confidence score (0.0–1.0).
+        timestamp:  ISO 8601 UTC timestamp of capture.
+        metadata:   Optional extra context (e.g., ASR model version, RMS noise).
+    """
+    slot: str
+    raw_value: str
+    source: str                    # "voice" | "touch" | "ocr" | "llm"
+    confidence: float = 1.0
+    timestamp: str = ""
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+
 # ── Dosha / Ayush Enumerations ────────────────────────────────────────────────
 
 class AgniClassification(str, Enum):

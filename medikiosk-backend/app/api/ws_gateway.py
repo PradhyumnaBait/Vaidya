@@ -132,7 +132,7 @@ async def session_websocket(websocket: WebSocket):
 
             # ── Consent Response ──────────────────────────────────────────────
             if msg_type == "consent_response":
-                agreed = raw.get("value") == "agree"
+                agreed = raw.get("value") == "agree" or raw.get("response") == "agree"
                 await consent_engine.record_consent_event(session_id, language, agreed)
 
                 if not agreed:
@@ -683,13 +683,13 @@ def _verify_message_hmac(raw: dict[str, Any], session_id: str) -> bool:
 
     Per plan Section 1.1: "mismatched signatures trigger immediate session termination."
     """
-    if settings.app_env == "development":
-        # In dev, accept unsigned messages so manual testing is friction-free
-        return True
-
     sig = raw.get("_sig", "")
     ts = raw.get("_ts", "")
     msg_type = raw.get("type", "")
+
+    if settings.app_env in ("development", "test"):
+        if not sig and not ts:
+            return True
 
     if not sig or not ts:
         logger.warning("Missing HMAC fields on msg_type=%s", msg_type)

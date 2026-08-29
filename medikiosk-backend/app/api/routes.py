@@ -12,7 +12,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.config import get_settings
 from app.core.session_manager import get_belief_state, get_redis

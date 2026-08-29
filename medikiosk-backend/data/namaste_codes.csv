@@ -1,0 +1,49 @@
+namaste_code,category,english_term,hindi_term,marathi_term,synonyms,icd11_tm2_code,icd11_allopathic_code,dosha_association,severity_tier
+NM-D001,Dosha,Vata Imbalance,वात असंतुलन,वात असंतोष,"Vata Vyadhi,Vataja Vikara",TM1A00,M62.838,Vata,moderate
+NM-D002,Dosha,Pitta Imbalance,पित्त असंतुलन,पित्त असंतोष,"Pitta Vyadhi,Pittaja Vikara",TM1A01,K30,Pitta,moderate
+NM-D003,Dosha,Kapha Imbalance,कफ असंतुलन,कफ असंतोष,"Kapha Vyadhi,Kaphaja Vikara",TM1A02,J68.9,Kapha,moderate
+NM-D004,Dosha,Tridosha Imbalance,त्रिदोष असंतुलन,त्रिदोष असंतोष,"Sannipata,Tridoshaja",TM1A03,R69,Tridosha,severe
+NM-A001,Agni,Mandagni (Sluggish Digestion),मंदाग्नि,मंदाग्नी,"Slow digestion,Indigestion,Sluggish gut",TM1B00,K30,Kapha,mild
+NM-A002,Agni,Tikshnagni (Hyperacidity),तीक्ष्णाग्नि,तीव्र अग्नी,"Hyperacidity,Acid peptic",TM1B01,K21.0,Pitta,moderate
+NM-A003,Agni,Vishamagni (Irregular Digestion),विषमाग्नि,विषम अग्नी,"Irregular digestion,IBS pattern",TM1B02,K58.9,Vata,moderate
+NM-A004,Agni,Samagni (Balanced Digestion),समाग्नि,सम अग्नी,"Healthy digestion,Normal appetite",TM1B03,,Tridosha,none
+NM-S001,Symptoms,Shiro Roga (Headache),शिरोरोग,डोकेदुखी,"Headache,Shirashoola,Head pain",TM1C00,R51.9,Vata,mild
+NM-S002,Symptoms,Hrid Roga (Chest Pain),हृद्रोग,छातीत वेदना,"Chest pain,Hridaya Shoola,Cardiac pain",TM1C01,R07.9,Pitta,critical
+NM-S003,Symptoms,Shwasa (Breathlessness),श्वास,दम लागणे,"Dyspnoea,Shortness of breath,Breathing difficulty",TM1C02,R06.0,Kapha,severe
+NM-S004,Symptoms,Kasa (Cough),कास,खोकला,"Cough,Kasaroga",TM1C03,R05.9,Kapha,mild
+NM-S005,Symptoms,Jvara (Fever),ज्वर,ताप,"Fever,Pyrexia,Hyperthermia",TM1C04,R50.9,Pitta,moderate
+NM-S006,Symptoms,Atisara (Diarrhoea),अतिसार,जुलाब,"Diarrhoea,Loose stools,Loose motions",TM1C05,A09,Pitta,moderate
+NM-S007,Symptoms,Vibandha (Constipation),विबंध,बद्धकोष्ठता,"Constipation,Hard stools",TM1C06,K59.0,Vata,mild
+NM-S008,Symptoms,Aruchi (Anorexia),अरुचि,भूक न लागणे,"Loss of appetite,Anorexia,Appetite loss",TM1C07,R63.0,Kapha,mild
+NM-S009,Symptoms,Trishna (Excessive Thirst),तृष्णा,जास्त तहान,"Polydipsia,Excessive thirst",TM1C08,R63.1,Pitta,moderate
+NM-S010,Symptoms,Prameha (Diabetes/Urinary disorders),प्रमेह,मूत्र विकार,"Diabetes,Glycosuria,Urinary disorder",TM1C09,E11.9,Kapha,severe
+NM-S011,Symptoms,Sandhishula (Joint Pain),संधिशूल,सांधेदुखी,"Joint pain,Arthralgia,Sandhi Vata",TM1C10,M79.3,Vata,moderate
+NM-S012,Symptoms,Vatavyadhi (Neurological pain),वातव्याधि,वात रोग,"Neuro pain,Sciatica,Neuropathy",TM1C11,M54.4,Vata,moderate
+NM-S013,Symptoms,Unmada (Psychiatric/Delirium),उन्माद,मानसिक विकृती,"Psychiatric symptoms,Delirium,Confusion",TM1C12,F29,Tridosha,severe
+NM-S014,Symptoms,Nidranasha (Insomnia),निद्रानाश,निद्रानाश,"Insomnia,Sleep disorder,Sleeplessness",TM1C13,G47.0,Vata,mild
+NM-S015,Symptoms,Shoth (Swelling/Oedema),शोथ,सूज,"Oedema,Swelling,Bloating",TM1C14,R60.9,Kapha,moderate
+NM-S016,Symptoms,Pandu (Anaemia/Pallor),पांडु,पांडुरोग,"Anaemia,Pallor,Weakness,Lethargy",TM1C15,D64.9,Pitta,moderate
+NM-S017,Symptoms,Hrillasa (Nausea),हृल्लास,मळमळ,"Nausea,Vomiting tendency",TM1C16,R11.0,Pitta,mild
+NM-S018,Symptoms,Chardi (Vomiting),छर्दि,उलटी,"Vomiting,Emesis",TM1C17,R11.1,Pitta,moderate
+NM-S019,Symptoms,Murcha (Syncope),मूर्च्छा,बेशुद्ध होणे,"Syncope,Fainting,Loss of consciousness",TM1C18,R55,Vata,critical
+NM-S020,Symptoms,Raktapitta (Bleeding disorders),रक्तपित्त,रक्तस्त्राव,"Bleeding,Haemorrhage,Blood in sputum",TM1C19,R04.9,Pitta,critical
+NM-K001,Koshtha,Krura Koshtha (Hard bowel),क्रूर कोष्ठ,कठोर पोट,"Constipation prone,Hard gut",TM1D00,K59.0,Vata,mild
+NM-K002,Koshtha,Mridu Koshtha (Soft bowel),मृदु कोष्ठ,मृदू पोट,"Loose bowel,Diarrhoea prone",TM1D01,K59.1,Pitta,mild
+NM-K003,Koshtha,Madhyama Koshtha (Normal bowel),मध्यम कोष्ठ,सामान्य पोट,"Normal bowel,Regular stools",TM1D02,,Tridosha,none
+NM-R001,Rasa,Madhura Rasa excess,मधुर रस,मधुर रस,"Sweet cravings,Sugar preference",TM1E00,,Kapha,mild
+NM-R002,Rasa,Tikta Rasa excess,तिक्त रस,तिखट रस,"Bitter preference,Tikta Pradhan",TM1E01,,Pitta,mild
+NM-F001,FolkIdiom,Pet mein gas bhari hai,पेट में गैस भरी है,पोटात वायू आहे,"Bloating,Flatulence,Distension",TM1C00,R14.0,Vata,mild
+NM-F002,FolkIdiom,Seena bhaari lagta hai,सीना भारी लगता है,छाती जड वाटते,"Heavy chest,Chest heaviness",TM1C01,R07.9,Kapha,moderate
+NM-F003,FolkIdiom,Aankhon ke aage andhera,आँखों के आगे अँधेरा,डोळ्यांसमोर अंधारी,"Visual blackout,Pre-syncope,Vertigo",TM1C18,H53.9,Vata,critical
+NM-F004,FolkIdiom,Haath pair sunn ho jaate hain,हाथ पैर सुन्न हो जाते हैं,हात पाय बधिर होतात,"Numbness,Parasthesia,Tingling",TM1C11,R20.2,Vata,moderate
+NM-F005,FolkIdiom,Sar ghoomta hai,सर घूमता है,डोकं गरगरतं,"Dizziness,Vertigo,Giddiness",TM1C00,R42,Vata,moderate
+NM-F006,FolkIdiom,Neend nahi aati,नींद नहीं आती,झोप येत नाही,"Insomnia,Sleep difficulty",TM1C13,G47.0,Vata,mild
+NM-F007,FolkIdiom,Khana hazam nahi hota,खाना हज़म नहीं होता,जेवण पचत नाही,"Indigestion,Dyspepsia",TM1B00,K30,Kapha,mild
+NM-F008,FolkIdiom,Pet mein dard rehta hai,पेट में दर्द रहता है,पोट दुखते,"Abdominal pain,Stomach pain",TM1C00,R10.9,Tridosha,moderate
+NM-F009,FolkIdiom,Chakkhar aate hain,चक्कर आते हैं,चक्कर येतात,"Dizziness,Vertigo,Fainting",TM1C18,R42,Vata,moderate
+NM-F010,FolkIdiom,Khoon ki kami,खून की कमी,रक्ताची कमतरता,"Anaemia,Blood deficiency",TM1C15,D64.9,Pitta,moderate
+NM-F011,FolkIdiom,Uchi bp,उची बीपी,उच्च रक्तदाब,"Hypertension,High BP",TM1A01,I10,Pitta,severe
+NM-F012,FolkIdiom,Sugar ki bimari,शुगर की बीमारी,साखरेचा आजार,"Diabetes mellitus,Hyperglycaemia",TM1C09,E11.9,Kapha,severe
+NM-F013,FolkIdiom,Dil ki dhadkan tej hai,दिल की धड़कन तेज़ है,हृदयाचे ठोके वेगाने पडतात,"Palpitations,Tachycardia,Racing heart",TM1C01,R00.0,Pitta,critical
+NM-F014,FolkIdiom,Gala kharab hai,गला ख़राब है,घसा दुखतो,"Sore throat,Pharyngitis",TM1C03,J02.9,Kapha,mild
+NM-F015,FolkIdiom,Peeth mein dard,पीठ में दर्द,पाठ दुखते,"Back pain,Lumbago",TM1C11,M54.5,Vata,moderate
