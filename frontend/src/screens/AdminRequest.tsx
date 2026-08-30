@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft, Building2, CheckCircle2 } from "lucide-react";
-import VaidyaWordmark from "@/components/ui/VaidyaWordmark";
+import VaidyaWordmark from "@/components/VaidyaWordmark";
 import { Button, Input, PasswordInput, PasswordStrength, AlertBanner } from "@/components/ui";
 import type { Screen } from "@/types";
 
@@ -44,9 +44,7 @@ export default function AdminRequest({ onNavigate }: AdminRequestProps) {
             <p className="text-sm text-[#71717A] leading-relaxed mb-7">
               Your administrator access request has been sent for verification.
             </p>
-            <Button variant="secondary" onClick={() => onNavigate("admin-login")}>
-              Return to sign in
-            </Button>
+            <Button variant="secondary" onClick={() => onNavigate("admin-login")}>Return to sign in</Button>
           </div>
         </main>
       </div>
@@ -76,11 +74,11 @@ export default function AdminRequest({ onNavigate }: AdminRequestProps) {
 
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3.5">
             {error && <AlertBanner type="error" message={error} />}
-            <Input label="Full name" name="name" type="text" placeholder="A. Singh" autoComplete="name" />
-            <Input label="Work email" name="email" type="email" placeholder="admin@hospital.in" autoComplete="email" />
-            <Input label="Hospital / Institution" name="hospital" type="text" placeholder="AIIA New Delhi" />
-            <Input label="Role / designation" name="role" type="text" placeholder="IT Lead / Hospital Admin" />
-            <Input label="Employee ID" name="empId" type="text" placeholder="EMP-XXXX" />
+            <Input label="Full name" name="name" type="text" placeholder="Ramesh Gupta" autoComplete="name" />
+            <Input label="Work email" name="email" type="email" placeholder="ramesh@hospital.in" autoComplete="email" />
+            <Input label="Hospital / Institution" name="hospital" type="text" placeholder="AIIMS New Delhi" />
+            <Input label="Role / Designation" name="role" type="text" placeholder="Head of IT Operations" />
+            <Input label="Employee ID" name="empId" type="text" placeholder="AIIMS-ADM-XXXX" />
             <Input label="Phone number" name="phone" type="tel" placeholder="+91 98765 43210" autoComplete="tel" />
             <div className="flex flex-col gap-1.5">
               <PasswordInput label="Create password" placeholder="At least 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />

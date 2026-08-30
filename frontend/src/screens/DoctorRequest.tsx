@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { ArrowLeft, Stethoscope, CheckCircle2 } from "lucide-react";
-import VaidyaWordmark from "@/components/ui/VaidyaWordmark";
+import VaidyaWordmark from "@/components/VaidyaWordmark";
 import { Button, Input, PasswordInput, PasswordStrength, AlertBanner } from "@/components/ui";
 import type { Screen } from "@/types";
 
 interface DoctorRequestProps {
-  onNavigate: (screen: Screen) => void;
+  onNavigate: (screen: Screen, meta?: Record<string, string>) => void;
 }
 
 export default function DoctorRequest({ onNavigate }: DoctorRequestProps) {
@@ -19,7 +19,8 @@ export default function DoctorRequest({ onNavigate }: DoctorRequestProps) {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const data = new FormData(form);
-    if (!data.get("name") || !password) { setError("Please fill in all required fields."); return; }
+    const name = data.get("name") as string;
+    if (!name || !password || !confirm) { setError("Please fill in all required fields."); return; }
     if (password !== confirm) { setError("Passwords do not match."); return; }
     if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     setError("");
@@ -32,7 +33,9 @@ export default function DoctorRequest({ onNavigate }: DoctorRequestProps) {
   if (submitted) {
     return (
       <div className="min-h-full flex flex-col" style={{ background: "#F6F6F7" }}>
-        <header className="px-6 md:px-10 py-5"><VaidyaWordmark size="md" /></header>
+        <header className="flex items-center gap-3 px-6 md:px-10 py-5">
+          <VaidyaWordmark size="md" />
+        </header>
         <main className="flex-1 flex items-center justify-center px-6">
           <div className="w-full max-w-md text-center animate-fade-up">
             <div className="flex justify-center mb-5">
@@ -42,7 +45,7 @@ export default function DoctorRequest({ onNavigate }: DoctorRequestProps) {
             </div>
             <h2 className="text-xl font-semibold text-[#18181B] mb-2">Access request submitted</h2>
             <p className="text-sm text-[#71717A] leading-relaxed mb-7">
-              Your request has been sent for verification.
+              Your request has been sent for verification. You will receive an email once your access is approved by your hospital administrator.
             </p>
             <Button variant="secondary" onClick={() => onNavigate("doctor-login")}>
               Return to sign in
@@ -56,7 +59,11 @@ export default function DoctorRequest({ onNavigate }: DoctorRequestProps) {
   return (
     <div className="min-h-full flex flex-col" style={{ background: "#F6F6F7" }}>
       <header className="flex items-center gap-3 px-6 md:px-10 py-5 animate-fade-up">
-        <button onClick={() => onNavigate("doctor-login")} className="flex items-center justify-center w-8 h-8 rounded hover:bg-[#F0F0F1] transition-colors text-[#71717A] hover:text-[#18181B]" aria-label="Back">
+        <button
+          onClick={() => onNavigate("doctor-login")}
+          className="flex items-center justify-center w-8 h-8 rounded hover:bg-[#F0F0F1] transition-colors text-[#71717A] hover:text-[#18181B]"
+          aria-label="Back"
+        >
           <ArrowLeft size={16} />
         </button>
         <VaidyaWordmark size="md" />
@@ -68,29 +75,58 @@ export default function DoctorRequest({ onNavigate }: DoctorRequestProps) {
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#EFF6FF]">
               <Stethoscope size={15} strokeWidth={1.75} className="text-[#2563EB]" />
             </div>
-            <span className="text-xs font-semibold uppercase tracking-[0.07em] text-[#71717A]">Doctor Workspace</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.07em] text-[#71717A]">
+              Doctor Workspace
+            </span>
           </div>
 
-          <h1 className="text-[24px] font-semibold text-[#18181B] leading-[1.2] mb-1" style={{ letterSpacing: "-0.014em" }}>Request access</h1>
-          <p className="text-sm text-[#71717A] mb-7">Enter your professional details to request access to the Vaidya clinical workspace.</p>
+          <h1 className="text-[24px] font-semibold text-[#18181B] leading-[1.2] mb-1" style={{ letterSpacing: "-0.014em" }}>
+            Request access
+          </h1>
+          <p className="text-sm text-[#71717A] mb-7">
+            Enter your professional details to request access to the Vaidya clinical workspace.
+          </p>
 
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3.5">
             {error && <AlertBanner type="error" message={error} />}
-            <Input label="Full name" name="name" type="text" placeholder="Dr. Rajesh Mehta" autoComplete="name" />
-            <Input label="Professional email" name="email" type="email" placeholder="dr.mehta@hospital.in" autoComplete="email" />
-            <Input label="Hospital / Institution" name="hospital" type="text" placeholder="AIIA New Delhi" />
-            <Input label="Department" name="department" type="text" placeholder="Internal Medicine" />
-            <Input label="Medical registration number" name="regNo" type="text" placeholder="MCI-XXXXX" />
+
+            <Input label="Full name" name="name" type="text" placeholder="Dr. Anjali Sharma" autoComplete="name" />
+            <Input label="Professional email" name="email" type="email" placeholder="anjali@hospital.in" autoComplete="email" />
+            <Input label="Hospital / Institution" name="hospital" type="text" placeholder="AIIMS New Delhi" />
+            <Input label="Department" name="department" type="text" placeholder="Cardiology" />
+            <Input label="Medical registration number" name="reg" type="text" placeholder="MCI-2019-XXXXX" />
             <Input label="Phone number" name="phone" type="tel" placeholder="+91 98765 43210" autoComplete="tel" />
+
             <div className="flex flex-col gap-1.5">
-              <PasswordInput label="Create password" placeholder="At least 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
+              <PasswordInput
+                label="Create password"
+                placeholder="At least 8 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+              />
               <PasswordStrength password={password} />
             </div>
-            <PasswordInput label="Confirm password" placeholder="Repeat your password" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" />
-            <p className="text-xs text-[#A1A1AA] mt-1">Access may require hospital verification.</p>
+
+            <PasswordInput
+              label="Confirm password"
+              placeholder="Repeat your password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              autoComplete="new-password"
+            />
+
+            <p className="text-xs text-[#A1A1AA] mt-1">
+              Your access may require hospital verification.
+            </p>
+
             <div className="flex flex-col gap-2 mt-2">
-              <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full">Request Access</Button>
-              <Button type="button" variant="ghost" onClick={() => onNavigate("doctor-login")} className="w-full">Back to Sign In</Button>
+              <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full">
+                Request Access
+              </Button>
+              <Button type="button" variant="ghost" onClick={() => onNavigate("doctor-login")} className="w-full">
+                Back to Sign In
+              </Button>
             </div>
           </form>
         </div>
