@@ -25,13 +25,15 @@ export type EncounterState =
 export interface Patient {
   id: string
   abhaNumber?: string
+  abhaId?: string
   name: string
   dateOfBirth?: string
   age?: number
-  sex: 'M' | 'F' | 'O'
+  sex: 'M' | 'F' | 'O' | 'male' | 'female' | 'other'
+  gender?: string
   phone?: string
   preferredLanguage: Language
-  createdAt: string
+  createdAt?: string
 }
 
 export interface Encounter {

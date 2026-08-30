@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Building2 } from "lucide-react";
 import VaidyaWordmark from "@/components/VaidyaWordmark";
-import { Button, Input, PasswordInput, Divider, AlertBanner } from "@/components/ui";
+import { Button, Input, PasswordInput, Divider } from "@/components/ui";
 import type { Screen } from "@/types";
 
 interface AdminLoginProps {
