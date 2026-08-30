@@ -1,13 +1,22 @@
-import { Languages, BadgeCheck, ShieldCheck } from "lucide-react";
-import VaidyaWordmark from "@/components/VaidyaWordmark";
-import ClinicalVisual from "@/components/ClinicalVisual";
-import type { Screen } from "@/types";
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { Languages, BadgeCheck, ShieldCheck } from 'lucide-react'
+import VaidyaWordmark from '@/components/VaidyaWordmark'
+import ClinicalVisual from '@/components/ClinicalVisual'
+import type { Screen } from '@/types'
 
 interface WelcomeProps {
-  onNavigate: (screen: Screen) => void;
+  onNavigate: (screen: Screen) => void
 }
 
 export default function Welcome({ onNavigate }: WelcomeProps) {
+  const router = useRouter()
+
+  const handleBeginPatientIntake = () => {
+    router.push('/patient/welcome')
+  }
+
   return (
     <div className="bg-radial-gradient min-h-screen w-full flex flex-col justify-between p-6 md:p-10 lg:p-12 text-[#191b23] select-none">
       {/* Background Soft Glow Effects */}
@@ -45,9 +54,9 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
             {/* Action Cards */}
             <div className="space-y-4 max-w-lg">
               
-              {/* Primary Card: Begin Patient Intake */}
+              {/* Primary Card: Begin Patient Intake -> Routes to P-01 (/patient/welcome) */}
               <div
-                onClick={() => onNavigate("patient-intake")}
+                onClick={handleBeginPatientIntake}
                 className="bg-white/80 backdrop-blur-xl border border-white rounded-2xl p-6 shadow-sm hover:shadow-md hover:translate-y-[-2px] active:scale-[0.99] transition-all cursor-pointer flex items-start gap-4 group"
               >
                 <div className="w-12 h-12 rounded-xl bg-[#2563EB] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm shadow-blue-500/30">
@@ -65,7 +74,7 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
 
               {/* Secondary Card: Staff & Clinical Access */}
               <div
-                onClick={() => onNavigate("staff-role")}
+                onClick={() => onNavigate('staff-role')}
                 className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-6 shadow-sm hover:shadow-md hover:translate-y-[-2px] active:scale-[0.99] transition-all cursor-pointer flex items-start gap-4 group"
               >
                 <div className="w-12 h-12 rounded-xl bg-[#F4F4F5] text-[#52525B] flex items-center justify-center shrink-0 border border-[#E4E4E7]">
@@ -108,5 +117,5 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
 
       </div>
     </div>
-  );
+  )
 }

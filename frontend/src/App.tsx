@@ -13,7 +13,7 @@ import ForgotPassword from "./screens/ForgotPassword";
 import PasswordReset from "./screens/PasswordReset";
 import AccessError from "./screens/AccessError";
 import AuthSuccess from "./screens/AuthSuccess";
-import PatientIntake from "./screens/PatientIntake";
+import PatientWelcomeLanguagePage from "./app/patient/welcome/page";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("welcome");
@@ -49,7 +49,7 @@ export default function App() {
       {screen === "password-reset" && <PasswordReset {...props} />}
       {screen === "access-error" && <AccessError {...props} />}
       {screen === "auth-success" && <AuthSuccess {...props} />}
-      {screen === "patient-intake" && <PatientIntake {...props} />}
+      {screen === "patient-intake" && <PatientWelcomeLanguagePage />}
     </div>
   );
 }
