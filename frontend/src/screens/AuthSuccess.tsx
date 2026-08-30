@@ -14,13 +14,31 @@ const roleLabels: Record<string, { title: string; subtitle: string }> = {
   admin: { title: "Hospital Operations", subtitle: "Preparing hospital operations." },
 };
 
+import { useRouter } from "next/navigation";
+import { useAuthStore, DEMO_USERS } from "@/store";
+
 export default function AuthSuccess({ meta }: AuthSuccessProps) {
-  const role = meta?.role || "doctor";
+  const router = useRouter();
+  const { login } = useAuthStore();
+  const role = (meta?.role as "doctor" | "nursing" | "admin") || "doctor";
   const info = roleLabels[role] || roleLabels.doctor;
 
   useEffect(() => {
-    // In a real application, this would redirect to the role-specific workspace
-  }, []);
+    // Set demo auth state
+    if (role === "doctor") login(DEMO_USERS.doctor);
+    else if (role === "nursing") login(DEMO_USERS.nursing);
+    else if (role === "admin") login(DEMO_USERS.admin);
+
+    const timer = setTimeout(() => {
+      if (role === "doctor") router.push("/doctor/queue");
+      else if (role === "nursing") router.push("/nursing/dashboard");
+      else if (role === "admin") router.push("/admin");
+      else router.push("/");
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [role, router, login]);
+
 
   return (
     <div className="min-h-full flex flex-col" style={{ background: "#F6F6F7" }}>

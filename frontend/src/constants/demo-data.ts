@@ -62,7 +62,7 @@ export const DEMO_ENCOUNTERS: Encounter[] = [
     department: 'Internal Medicine',
     encounterType: 'OPD_ALLOPATHIC',
     state: 'READY_FOR_REVIEW',
-    tokenNumber: '31',
+    tokenNumber: 'A-028',
     createdAt: '2026-08-15T10:14:00Z',
   },
   {
@@ -72,7 +72,7 @@ export const DEMO_ENCOUNTERS: Encounter[] = [
     department: 'Internal Medicine',
     encounterType: 'OPD_ALLOPATHIC',
     state: 'UNDER_PHYSICIAN_REVIEW',
-    tokenNumber: '23',
+    tokenNumber: 'A-023',
     createdAt: '2026-08-15T10:22:00Z',
   },
   {
@@ -82,7 +82,7 @@ export const DEMO_ENCOUNTERS: Encounter[] = [
     department: 'Internal Medicine',
     encounterType: 'OPD_ALLOPATHIC',
     state: 'READY_FOR_REVIEW',
-    tokenNumber: '28',
+    tokenNumber: 'A-031',
     createdAt: '2026-08-15T09:10:00Z',
   },
   {
@@ -92,7 +92,7 @@ export const DEMO_ENCOUNTERS: Encounter[] = [
     department: 'AYUSH OPD',
     encounterType: 'OPD_AYUSH',
     state: 'PROCESSING_DOCUMENTS',
-    tokenNumber: '35',
+    tokenNumber: 'AY-014',
     createdAt: '2026-08-15T09:30:00Z',
   },
   {
@@ -102,7 +102,7 @@ export const DEMO_ENCOUNTERS: Encounter[] = [
     department: 'Internal Medicine',
     encounterType: 'OPD_ALLOPATHIC',
     state: 'INTERVIEWING',
-    tokenNumber: '41',
+    tokenNumber: 'A-042',
     createdAt: '2026-08-15T10:00:00Z',
   },
 ]
@@ -172,6 +172,24 @@ export const DEMO_FACTS_ENC001: ClinicalFact[] = [
     confidence: 0.89, confidenceTier: 3,
     verificationStatus: 'UNVERIFIED', conflictStatus: 'IN_CONFLICT',
     eventDatePrecision: 'UNKNOWN', createdAt: '2026-08-15T10:26:00Z',
+  },
+  {
+    id: 'fact-007', patientId: 'pat-001', encounterId: 'enc-001',
+    factType: 'SYMPTOM_QUALITY', domain: 'HPI', fieldName: 'pain_character',
+    rawValue: 'Burning, sharp sensation aggravated after meals',
+    sourceType: 'INTERVIEW', sourceId: 'sess-001',
+    confidence: 0.92, confidenceTier: 3,
+    verificationStatus: 'UNVERIFIED', conflictStatus: 'NO_CONFLICT',
+    eventDatePrecision: 'RELATIVE', createdAt: '2026-08-15T10:25:00Z',
+  },
+  {
+    id: 'fact-008', patientId: 'pat-001', encounterId: 'enc-001',
+    factType: 'LIFESTYLE', domain: 'AYUSH', fieldName: 'ahara_vihara',
+    rawValue: 'Ahara: Irregular timing, spicy/fried food; Vihara: High stress, disturbed sleep',
+    sourceType: 'INTERVIEW', sourceId: 'sess-001',
+    confidence: 0.88, confidenceTier: 3,
+    verificationStatus: 'UNVERIFIED', conflictStatus: 'NO_CONFLICT',
+    eventDatePrecision: 'RELATIVE', createdAt: '2026-08-15T10:27:00Z',
   },
 ]
 

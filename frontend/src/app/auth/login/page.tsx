@@ -15,7 +15,7 @@ export default function StaffRoleSelectionPage() {
       {/* Top Bar */}
       <div className="w-full max-w-4xl mx-auto flex items-center justify-between">
         <button
-          onClick={() => router.push('/patient/welcome')}
+          onClick={() => router.push('/')}
           className="inline-flex items-center gap-2 text-[13px] text-[#71717A] hover:text-[#18181B] transition-colors cursor-pointer"
         >
           <ArrowLeft size={16} />

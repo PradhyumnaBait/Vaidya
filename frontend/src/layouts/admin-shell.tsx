@@ -58,7 +58,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
           </span>
         </header>
-        <main className="flex-1 overflow-y-auto p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto p-0 bg-[#FAF8FF]">{children}</main>
       </div>
       <ToastContainer />
     </div>
