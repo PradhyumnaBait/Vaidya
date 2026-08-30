@@ -78,6 +78,7 @@ export const mockAdapter = {
     return []
   },
   async uploadDocument(encounterId: string, file: File, type: string): Promise<MedicalDocument> {
+    void type
     await delay(800)
     return {
       id: `doc-${Date.now()}`, encounterId, patientId: 'pat-001',
@@ -131,6 +132,7 @@ export const mockAdapter = {
 
   // ── Approval ──────────────────────────────────────────────────────────
   async approveCase(encounterId: string): Promise<{ fhirBundleId: string; hisEncounterId: string }> {
+    void encounterId
     await delay(1200)
     return { fhirBundleId: `fhir-${Date.now()}`, hisEncounterId: `ENC-0829-1042` }
   },
@@ -145,6 +147,7 @@ export const mockAdapter = {
     return DEMO_INTEGRATIONS
   },
   async getAuditEvents(filters?: { eventType?: string; dateRange?: string }): Promise<AuditEvent[]> {
+    void filters
     await delay(350)
     return DEMO_AUDIT_EVENTS
   },

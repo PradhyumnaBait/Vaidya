@@ -1,6 +1,6 @@
 import type {
   Patient, Encounter, ClinicalFact, ClinicalConflict, MedicalDocument,
-  TimelineEvent, RedFlagAlert, CompletenessEntry, CaseIntelligencePackage,
+  TimelineEvent, RedFlagAlert, CompletenessEntry,
   TriageQueueEntry, AuditEvent, IntegrationStatus, AdminMetrics, Question
 } from '@/types'
 

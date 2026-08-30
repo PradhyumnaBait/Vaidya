@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useUIStore } from '@/store'
-import { physicianService } from '@/services'
 import { ClinicalFact } from '@/types'
 import { Drawer } from '@/components/ui'
 import { ProvenanceChip } from './provenance-chip'
