@@ -1,229 +1,76 @@
 'use client'
-import { useEffect, useState } from "react";
-
-const layers = [
-  {
-    label: "Patient Input",
-    sublabel: "Voice · Touch · Document",
-    items: ["Chief complaint captured", "Language: Hindi (auto-detected)", "Voice transcript ready"],
-    accent: "#2563EB",
-    accentBg: "#EFF6FF",
-  },
-  {
-    label: "Document Analysis",
-    sublabel: "Multi-modal extraction",
-    items: ["CBC report · 14 Mar 2024", "Prescription · Apollo Hospital", "X-Ray findings processed"],
-    accent: "#0D9488",
-    accentBg: "#F0FDFA",
-  },
-  {
-    label: "Structured Information",
-    sublabel: "Clinical facts · Timeline",
-    items: ["Hb: 9.2 g/dL  [flagged ↓]", "Duration: 3 months, progressive", "Co-morbidity: T2DM (2019)"],
-    accent: "#16A34A",
-    accentBg: "#F0FDF4",
-  },
-  {
-    label: "Physician Review",
-    sublabel: "Case brief · Evidence-linked",
-    items: ["AI summary · 3 sources", "Conflict resolved · 1 item", "Ready for consultation"],
-    accent: "#2563EB",
-    accentBg: "#EFF6FF",
-  },
-];
 
 export default function ClinicalVisual() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   return (
-    <div
-      className="relative w-full h-full flex items-center justify-center select-none py-6"
-      aria-hidden="true"
-    >
-      {/* Ambient background glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 60% at 50% 45%, rgba(37,99,235,0.08) 0%, transparent 70%)",
-        }}
-      />
+    <div className="relative w-full max-w-[480px] flex flex-col items-center justify-center select-none py-4">
+      {/* 3D Stack Canvas Container */}
+      <div className="relative w-full bg-white/40 backdrop-blur-xl border border-white/60 rounded-[28px] p-6 shadow-xl shadow-blue-500/5">
+        
+        {/* Top Floating Badge */}
+        <div className="absolute -top-4 right-8 z-30">
+          <div className="px-5 py-2 rounded-full bg-[#2563EB] text-white text-[12px] font-bold uppercase tracking-wider shadow-md shadow-blue-500/20">
+            Physician Verified
+          </div>
+        </div>
 
-      {/* 3D Stack container */}
-      <div
-        className="relative"
-        style={{
-          width: 330,
-          height: 380,
-          perspective: "1000px",
-          perspectiveOrigin: "50% 40%",
-          transformStyle: "preserve-3d",
-        }}
-      >
-        {layers.map((layer, i) => {
-          const yOffset = i * 78;
-          const delay = `${i * 90 + 100}ms`;
+        {/* Vertical Dotted Guide Line */}
+        <div className="absolute left-[54%] top-12 bottom-12 w-px border-r-2 border-dashed border-[#2563EB]/40 z-0" />
 
-          return (
-            <div
-              key={layer.label}
-              className="absolute w-full"
-              style={{
-                top: yOffset,
-                opacity: mounted ? 1 : 0,
-                transform: mounted
-                  ? "translateY(0px)"
-                  : "translateY(16px)",
-                transition: `opacity 400ms ease-out ${delay}, transform 400ms ease-out ${delay}`,
-              }}
-            >
-              {/* 3D Panel Surface */}
-              <div
-                style={{
-                  background: "#FFFFFF",
-                  border: "1px solid #E4E4E7",
-                  borderRadius: 10,
-                  padding: "12px 16px",
-                  boxShadow:
-                    "0 4px 20px -2px rgba(0,0,0,0.08), 0 2px 6px -1px rgba(0,0,0,0.04)",
-                  transform: `rotateX(${12 - i * 1.5}deg) rotateY(-12deg) translateZ(${i * 8}px)`,
-                  transformOrigin: "50% 50%",
-                  transformStyle: "preserve-3d",
-                  willChange: "transform",
-                }}
-              >
-                {/* Panel header */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div
-                      style={{
-                        width: 7,
-                        height: 7,
-                        borderRadius: "50%",
-                        background: layer.accent,
-                        flexShrink: 0,
-                        boxShadow: `0 0 6px ${layer.accent}`,
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontFamily: "var(--font-sans)",
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: "#18181B",
-                        letterSpacing: "-0.01em",
-                      }}
-                    >
-                      {layer.label}
-                    </span>
-                  </div>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: 10,
-                      color: "#71717A",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {layer.sublabel}
-                  </span>
-                </div>
-
-                {/* Divider */}
-                <div style={{ height: 1, background: "#F4F4F5", marginBottom: 8 }} />
-
-                {/* Items */}
-                <div className="flex flex-col gap-1.5">
-                  {layer.items.map((item, j) => (
-                    <div key={j} className="flex items-center gap-2">
-                      <div
-                        style={{
-                          width: 14,
-                          height: 12,
-                          background: layer.accentBg,
-                          borderRadius: 3,
-                          border: `1px solid ${layer.accent}30`,
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          fontSize: 11,
-                          color: "#3F3F46",
-                          fontWeight: 400,
-                        }}
-                      >
-                        {item}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Layer indicator dots */}
-                <div
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5"
-                  style={{ opacity: 0.4 }}
-                >
-                  {layers.map((_, k) => (
-                    <div
-                      key={k}
-                      style={{
-                        width: 3,
-                        height: k === i ? 18 : 8,
-                        background: k === i ? layer.accent : "#D4D4D8",
-                        borderRadius: 2,
-                        transition: "all 200ms",
-                      }}
-                    />
-                  ))}
-                </div>
+        {/* Stack Items Container */}
+        <div className="relative z-10 flex flex-col gap-6 pt-2">
+          
+          {/* Layer 1: Clinical Intelligence */}
+          <div className="flex flex-col gap-2">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#71717A] pl-2">
+              Clinical Intelligence
+            </span>
+            <div className="bg-white/90 backdrop-blur-md border border-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-2.5 w-10 bg-[#2563EB] rounded-full" />
+                <div className="h-2.5 w-14 bg-[#16A34A] rounded-full" />
               </div>
-
-              {/* Connecting vertical guide */}
-              {i < layers.length - 1 && (
-                <div
-                  className="absolute"
-                  style={{
-                    left: 28,
-                    bottom: -16,
-                    width: 2,
-                    height: 16,
-                    background:
-                      "linear-gradient(to bottom, #2563EB40, transparent)",
-                  }}
-                />
-              )}
+              <div className="space-y-1.5">
+                <div className="h-2 bg-[#E4E4E7] rounded-full w-full" />
+                <div className="h-2 bg-[#F4F4F5] rounded-full w-3/4" />
+              </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
 
-      {/* Bottom label */}
-      <div
-        className="absolute bottom-2 left-0 right-0 flex justify-center"
-        style={{
-          opacity: mounted ? 1 : 0,
-          transition: "opacity 400ms ease-out 600ms",
-        }}
-      >
-        <span
-          className="px-3 py-1 rounded-full bg-white border border-[#E4E4E7] shadow-2xs"
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: 10,
-            color: "#71717A",
-            letterSpacing: "0.06em",
-            fontWeight: 600,
-            textTransform: "uppercase",
-          }}
-        >
-          Clinical intelligence flow
-        </span>
+          {/* Layer 2: Document Scanning */}
+          <div className="flex flex-col gap-2">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#71717A] pl-2">
+              Document Scanning
+            </span>
+            <div className="bg-white/90 backdrop-blur-md border border-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[#F0FDF4] border border-[#BBF7D0] flex items-center justify-center text-[#16A34A] shrink-0">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                  <path d="M1.5 5L5 8.5L12.5 1" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <div className="h-2 bg-[#E4E4E7] rounded-full w-4/5" />
+                <div className="h-2 bg-[#F4F4F5] rounded-full w-1/2" />
+              </div>
+            </div>
+          </div>
+
+          {/* Layer 3: Patient Input */}
+          <div className="flex flex-col gap-2">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#71717A] pl-2">
+              Patient Input
+            </span>
+            <div className="bg-white/90 backdrop-blur-md border border-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all flex items-center justify-between">
+              <div className="space-y-1.5 flex-1 pr-4">
+                <div className="h-2 bg-[#E4E4E7] rounded-full w-3/4" />
+                <div className="h-2 bg-[#F4F4F5] rounded-full w-1/2" />
+              </div>
+              <div className="w-7 h-7 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center font-bold text-sm shrink-0">
+                +
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   );

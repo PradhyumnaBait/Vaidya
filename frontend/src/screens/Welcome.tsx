@@ -1,4 +1,4 @@
-import { Stethoscope, ShieldCheck, Languages, BadgeCheck } from "lucide-react";
+import { Languages, BadgeCheck, ShieldCheck } from "lucide-react";
 import VaidyaWordmark from "@/components/VaidyaWordmark";
 import ClinicalVisual from "@/components/ClinicalVisual";
 import type { Screen } from "@/types";
@@ -9,100 +9,103 @@ interface WelcomeProps {
 
 export default function Welcome({ onNavigate }: WelcomeProps) {
   return (
-    <div className="bg-radial-gradient min-h-screen w-full flex flex-col relative overflow-hidden text-[#191b23] selection:bg-[#2563eb] selection:text-white select-none">
-      {/* Atmospheric Background Blurs */}
-      <div className="noise-overlay z-0" />
-      <div className="absolute top-[-10%] right-[-5%] w-[1000px] h-[1000px] bg-blue-500/10 rounded-full blur-[160px] pointer-events-none z-0" />
-      <div className="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-teal-500/5 rounded-full blur-[140px] pointer-events-none z-0" />
-      <div className="absolute top-[20%] left-[40%] w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none z-0" />
+    <div className="bg-radial-gradient min-h-screen w-full flex flex-col justify-between p-6 md:p-10 lg:p-12 text-[#191b23] select-none">
+      {/* Background Soft Glow Effects */}
+      <div className="noise-overlay" />
+      <div className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[140px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-teal-500/5 rounded-full blur-[120px] pointer-events-none z-0" />
 
-      {/* Primary Content Container */}
-      <div className="flex-1 flex flex-col lg:flex-row w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8 relative z-10">
+      <div className="w-full max-w-[1360px] mx-auto flex-1 flex flex-col justify-between relative z-10">
         
-        {/* Left Region: Brand & Actions */}
-        <div className="flex-1 flex flex-col justify-center max-w-3xl pt-6 lg:pt-0 pb-8 lg:pb-0 lg:pr-8" id="content-region">
-          <header className="mb-10 animate-fade-up stagger-1">
-            <div className="flex items-center gap-4 mb-8">
-              <VaidyaWordmark size="md" showDescriptor={false} />
-              <div className="h-6 w-px bg-[#c3c6d7]/50" />
-              <span className="font-mono text-sm tracking-widest text-[#2563EB] font-medium uppercase">
-                Clinical Intelligence
-              </span>
+        {/* Top Header */}
+        <header className="flex items-center gap-4 mb-8">
+          <VaidyaWordmark size="md" showDescriptor={false} />
+          <div className="h-5 w-px bg-[#C3C6D7]/60" />
+          <span className="font-mono text-xs tracking-widest text-[#2563EB] font-semibold uppercase">
+            Clinical Intelligence
+          </span>
+        </header>
+
+        {/* Main Content Split Composition */}
+        <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center my-auto py-6">
+          
+          {/* Left Region - Title & Cards */}
+          <div className="lg:col-span-6 flex flex-col justify-center space-y-8">
+            
+            {/* Title & Subtitle */}
+            <div>
+              <h1 className="text-[44px] sm:text-[56px] font-semibold text-[#18181B] tracking-tight leading-[1.1]">
+                Welcome to Vaidya
+              </h1>
+              <p className="text-[17px] sm:text-[19px] text-[#52525B] mt-3 leading-relaxed">
+                Your clinical information, prepared before the consultation.
+              </p>
             </div>
 
-            <h1 className="text-[44px] sm:text-[56px] lg:text-[64px] leading-[1.1] font-semibold text-[#191b23] mb-5 tracking-[-0.03em] text-glow">
-              Welcome to Vaidya
-            </h1>
-            <p className="text-[17px] sm:text-[20px] text-[#434655] max-w-xl leading-relaxed">
-              Your clinical information, prepared before the consultation.
-            </p>
-          </header>
-
-          {/* Action Cards */}
-          <div className="space-y-5 animate-fade-up stagger-2 max-w-lg">
-            
-            {/* Primary Action: Begin Patient Intake */}
-            <button
-              onClick={() => onNavigate("patient-intake")}
-              className="hero-card group relative w-full flex flex-col items-start justify-center px-8 py-7 rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-[#2563eb]/30 cursor-pointer active:scale-[0.99]"
-            >
-              <div className="flex items-center gap-4 mb-2 relative z-10">
-                <span className="p-2 rounded-xl bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center">
-                  <Stethoscope size={28} strokeWidth={2} />
-                </span>
-                <span className="text-[22px] tracking-tight font-semibold text-[#191b23] group-hover:text-[#2563EB] transition-colors">
-                  Begin Patient Intake
-                </span>
+            {/* Action Cards */}
+            <div className="space-y-4 max-w-lg">
+              
+              {/* Primary Card: Begin Patient Intake */}
+              <div
+                onClick={() => onNavigate("patient-intake")}
+                className="bg-white/80 backdrop-blur-xl border border-white rounded-2xl p-6 shadow-sm hover:shadow-md hover:translate-y-[-2px] active:scale-[0.99] transition-all cursor-pointer flex items-start gap-4 group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#2563EB] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm shadow-blue-500/30">
+                  +
+                </div>
+                <div>
+                  <h3 className="text-[19px] font-bold text-[#18181B] group-hover:text-[#2563EB] transition-colors">
+                    Begin Patient Intake
+                  </h3>
+                  <p className="text-[14px] text-[#71717A] mt-1">
+                    Speak, tap, or scan your previous records.
+                  </p>
+                </div>
               </div>
-              <span className="text-[#434655] text-[15px] font-medium relative z-10 pl-14">
-                Speak, tap, or scan your previous records.
-              </span>
-            </button>
 
-            {/* Secondary Action: Staff & Clinical Access */}
-            <button
-              onClick={() => onNavigate("staff-role")}
-              className="glass-panel-secondary group relative w-full flex flex-col items-start justify-center px-8 py-5 rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#737686]/30 cursor-pointer active:scale-[0.99]"
-            >
-              <div className="flex items-center gap-3 mb-1">
-                <span className="p-1.5 rounded-lg bg-white border border-[#E4E4E7] text-[#737686] group-hover:text-[#18181B] group-hover:border-[#2563EB] transition-all">
-                  <ShieldCheck size={20} />
-                </span>
-                <span className="text-[17px] text-[#191b23] tracking-tight font-medium">
-                  Staff &amp; Clinical Access
-                </span>
+              {/* Secondary Card: Staff & Clinical Access */}
+              <div
+                onClick={() => onNavigate("staff-role")}
+                className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-6 shadow-sm hover:shadow-md hover:translate-y-[-2px] active:scale-[0.99] transition-all cursor-pointer flex items-start gap-4 group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-[#F4F4F5] text-[#52525B] flex items-center justify-center shrink-0 border border-[#E4E4E7]">
+                  <ShieldCheck size={22} />
+                </div>
+                <div>
+                  <h3 className="text-[19px] font-bold text-[#18181B] group-hover:text-[#2563EB] transition-colors">
+                    Staff &amp; Clinical Access
+                  </h3>
+                  <p className="text-[14px] text-[#71717A] mt-1">
+                    For doctors, nursing staff, and administrators.
+                  </p>
+                </div>
               </div>
-              <span className="text-[#737686] text-[14px] pl-10">
-                For doctors, nursing staff, and administrators.
-              </span>
-            </button>
+
+            </div>
           </div>
 
-          {/* Footer Info */}
-          <footer className="mt-12 lg:mt-24 space-y-4 animate-fade-up stagger-3">
-            <div className="flex items-center gap-3 text-[#434655]/90">
-              <Languages size={18} className="text-[#2563EB]" />
-              <span className="text-[14px] font-medium">Available in multiple Indian languages</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="h-px bg-[#c3c6d7]/30 flex-1 max-w-[60px]" />
-              <div className="flex items-center gap-2 font-mono text-[11px] text-[#737686] uppercase tracking-[0.15em]">
-                <BadgeCheck size={14} className="text-[#16A34A]" />
-                <span>Secure clinical intake • Physician verified</span>
-              </div>
-            </div>
-          </footer>
-        </div>
-
-        {/* Right Region: Visual Anchor */}
-        <div
-          className="flex-1 hidden lg:flex items-center justify-center relative animate-fade-left stagger-4"
-          id="visual-region"
-        >
-          <div className="perspective-container relative w-full max-w-[560px] aspect-square flex items-center justify-center">
+          {/* Right Region - 3D Visual Anchor Stack */}
+          <div className="lg:col-span-6 flex items-center justify-center">
             <ClinicalVisual />
           </div>
-        </div>
+        </main>
+
+        {/* Bottom Footer */}
+        <footer className="pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[13px] text-[#71717A]">
+          <div className="flex items-center gap-2">
+            <Languages size={16} className="text-[#2563EB]" />
+            <span>Available in multiple Indian languages</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="h-px bg-[#C3C6D7]/40 w-12 hidden sm:block" />
+            <div className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-[#71717A]">
+              <BadgeCheck size={14} className="text-[#16A34A]" />
+              <span>SECURE CLINICAL INTAKE • PHYSICIAN VERIFIED</span>
+            </div>
+          </div>
+        </footer>
+
       </div>
     </div>
   );
