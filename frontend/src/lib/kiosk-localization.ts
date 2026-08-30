@@ -191,16 +191,10 @@ import type { KioskLanguageOption } from '@/types/kiosk'
 import type { Language } from '@/types'
 
 export const KIOSK_LANGUAGES: KioskLanguageOption[] = [
-  { code: 'hi' as Language, native: 'हिंदी', english: 'Hindi' },
   { code: 'en' as Language, native: 'English', english: 'English' },
+  { code: 'hi' as Language, native: 'हिन्दी', english: 'Hindi' },
   { code: 'mr' as Language, native: 'मराठी', english: 'Marathi' },
   { code: 'gu' as Language, native: 'ગુજરાતી', english: 'Gujarati' },
   { code: 'bn' as Language, native: 'বাংলা', english: 'Bengali' },
-  { code: 'te' as Language, native: 'తెలుగు', english: 'Telugu' },
   { code: 'ta' as Language, native: 'தமிழ்', english: 'Tamil' },
-  { code: 'kn' as Language, native: 'ಕನ್ನಡ', english: 'Kannada' },
-  { code: 'ml' as Language, native: 'മലയാളം', english: 'Malayalam' },
-  { code: 'pa' as Language, native: 'ਪੰਜਾਬੀ', english: 'Punjabi' },
-  { code: 'or' as Language, native: 'ଓଡ଼ିଆ', english: 'Odia' },
-  { code: 'ur' as Language, native: 'اردو', english: 'Urdu', dir: 'rtl' },
 ]

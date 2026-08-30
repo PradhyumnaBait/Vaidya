@@ -1,31 +1,18 @@
 'use client'
 /**
- * K-05 — Clinical Intake Interview (Phase 3 + Multimodal Refinement)
+ * K-05 — Clinical Intake Interview (Phase 3 + Multimodal + Multilingual)
  *
  * Route: /kiosk/intake
  *
- * Multimodal interaction principles:
- * - Voice is a first-class interaction mode throughout the interview.
- * - Every question supports:
- *   1. 🔊 Hear question (TTS audio affordance with simulated playback)
- *   2. 🎙️ Speak answer (Voice STT simulation that transcribes and auto-selects option)
- *   3. 👆 Touch answer selection with clear active states
- *   4. 🔄 Retry / edit recognition
- *   5. ❓ Staff assistance note
- *
- * Stitch references:
- * - intake_start_chief_complaint_p_06 (Chief complaint + voice / touch options)
- * - clinical_interview_listening_p_07 (Voice listening active waveform)
- * - interview_voice_confirmation_p_08 (Transcription review & confirmation)
- * - clinical_interview_touch_answer_p_09 (Large touch answer selection)
- * - interview_adaptive_follow_up_p_10 (Adaptive branch based on answers)
- * - ayush_question_ahara_vihara_p_12 (AYUSH & lifestyle dimensions)
+ * Multilingual Architecture:
+ * - Powered by useKioskTranslation() for complete EN, HI, MR translations.
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKioskStore } from '@/store/kiosk.store'
+import { useKioskTranslation } from '@/lib/hooks/use-kiosk-translation'
 import { KioskButton } from '@/components/kiosk/kiosk-button'
 
 type IntakeStage =
@@ -40,6 +27,7 @@ type VoiceModalState = 'IDLE' | 'LISTENING' | 'PROCESSING' | 'CONFIRMING'
 
 export default function KioskIntakePage() {
   const router = useRouter()
+  const { t } = useKioskTranslation()
   const { language, patientData, advanceStep, setIntakeAnswer, resetSession, updateActivity } = useKioskStore()
 
   const [stage, setStage] = useState<IntakeStage>('INTRO')
@@ -50,10 +38,10 @@ export default function KioskIntakePage() {
   const [isSpeakingQuestion, setIsSpeakingQuestion] = useState(false)
 
   // Answers State
-  const [selectedComplaint, setSelectedComplaint] = useState<string>('Stomach / Digestion')
-  const [selectedDuration, setSelectedDuration] = useState<string>('1 to 2 weeks')
-  const [selectedCharacter, setSelectedCharacter] = useState<string>('Burning sensation / Acidity')
-  const [selectedLifestyle, setSelectedLifestyle] = useState<string>('Worse after spicy or oily meals')
+  const [selectedComplaint, setSelectedComplaint] = useState<string>(t.intake.catStomach)
+  const [selectedDuration, setSelectedDuration] = useState<string>(t.intake.durWeeks)
+  const [selectedCharacter, setSelectedCharacter] = useState<string>(t.intake.qualBurning)
+  const [selectedLifestyle, setSelectedLifestyle] = useState<string>(t.intake.lifeSpicy)
 
   useEffect(() => {
     advanceStep('INTAKE')
@@ -176,7 +164,7 @@ export default function KioskIntakePage() {
               </span>
             </div>
             <span className="text-[11px] font-bold text-[#006a61] bg-[#86f2e4]/30 px-2 py-0.5 rounded-md">
-              Intake Active
+              {t.intake.title}
             </span>
           </div>
         )}
@@ -192,7 +180,7 @@ export default function KioskIntakePage() {
                   : 'bg-[#ededf9] text-[#004ac6]',
               ].join(' ')}
             >
-              <span>1. Complaint</span>
+              <span>{t.intake.timelineComplaint}</span>
               {stage !== 'CHIEF_COMPLAINT' && <span>✓</span>}
             </div>
             <span className="text-[#a1a1aa]">→</span>
@@ -207,7 +195,7 @@ export default function KioskIntakePage() {
                   : 'bg-[#f3f3fe] text-[#a1a1aa]',
               ].join(' ')}
             >
-              <span>2. Duration</span>
+              <span>{t.intake.timelineDuration}</span>
               {(stage === 'CHARACTER' || stage === 'AYUSH_LIFESTYLE') && <span>✓</span>}
             </div>
             <span className="text-[#a1a1aa]">→</span>
@@ -222,7 +210,7 @@ export default function KioskIntakePage() {
                   : 'bg-[#f3f3fe] text-[#a1a1aa]',
               ].join(' ')}
             >
-              <span>3. Quality</span>
+              <span>{t.intake.timelineQuality}</span>
               {stage === 'AYUSH_LIFESTYLE' && <span>✓</span>}
             </div>
             <span className="text-[#a1a1aa]">→</span>
@@ -235,7 +223,7 @@ export default function KioskIntakePage() {
                   : 'bg-[#f3f3fe] text-[#a1a1aa]',
               ].join(' ')}
             >
-              <span>4. Lifestyle</span>
+              <span>{t.intake.timelineLifestyle}</span>
             </div>
           </div>
         )}
@@ -255,16 +243,13 @@ export default function KioskIntakePage() {
             >
               <div className="space-y-1.5">
                 <span className="text-[13px] font-bold text-[#004ac6] tracking-wider uppercase">
-                  Multimodal Clinical Intake
+                  Vaidya Clinical Intake
                 </span>
-                <h1 className="text-[32px] font-bold text-[#191b23] leading-tight">
-                  Health Assessment
+                <h1 className="text-[30px] font-bold text-[#191b23] leading-tight">
+                  {t.intake.title}
                 </h1>
-                <p className="text-[20px] text-[#434655]" lang="hi">
-                  स्वास्थ्य संबंधी प्रश्न
-                </p>
-                <p className="text-[14px] text-[#737686] mt-1 max-w-[480px] mx-auto leading-relaxed">
-                  We will ask 4 short questions to help your consulting doctor prepare for your visit.
+                <p className="text-[14px] text-[#737686] max-w-[480px] mx-auto leading-relaxed">
+                  {t.intake.introDesc}
                 </p>
               </div>
 
@@ -279,8 +264,8 @@ export default function KioskIntakePage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-[15px] font-bold text-[#191b23]">Voice &amp; Audio Support</h3>
-                    <p className="text-[13px] text-[#737686]">Listen to questions or speak your answers anytime using the microphone icon.</p>
+                    <h3 className="text-[15px] font-bold text-[#191b23]">{t.intake.voiceFeatureTitle}</h3>
+                    <p className="text-[13px] text-[#737686]">{t.intake.voiceFeatureDesc}</p>
                   </div>
                 </div>
 
@@ -294,8 +279,8 @@ export default function KioskIntakePage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-[15px] font-bold text-[#191b23]">Touch-First Selection</h3>
-                    <p className="text-[13px] text-[#737686]">Large, clear touch cards are available for fast one-tap answering.</p>
+                    <h3 className="text-[15px] font-bold text-[#191b23]">{t.intake.touchFeatureTitle}</h3>
+                    <p className="text-[13px] text-[#737686]">{t.intake.touchFeatureDesc}</p>
                   </div>
                 </div>
               </div>
@@ -309,7 +294,7 @@ export default function KioskIntakePage() {
                     updateActivity()
                   }}
                 >
-                  Start Health Questions →
+                  {t.intake.startIntakeButton}
                 </KioskButton>
 
                 <KioskButton
@@ -317,7 +302,7 @@ export default function KioskIntakePage() {
                   size="full"
                   onClick={() => router.push('/kiosk/consent')}
                 >
-                  ← Back to Consent
+                  ← {t.common.back}
                 </KioskButton>
               </div>
             </motion.div>
@@ -339,7 +324,7 @@ export default function KioskIntakePage() {
               <div className="text-center space-y-1">
                 <div className="flex justify-center items-center gap-2">
                   <h1 className="text-[25px] font-bold text-[#191b23] leading-tight">
-                    What brings you here today?
+                    {t.intake.complaintTitle}
                   </h1>
                   <button
                     onClick={() => handleHearQuestion()}
@@ -352,12 +337,12 @@ export default function KioskIntakePage() {
                     </svg>
                   </button>
                 </div>
-                <p className="text-[17px] text-[#434655]" lang="hi">
-                  आज आप किस समस्या के लिए आए हैं?
+                <p className="text-[14px] text-[#737686]">
+                  {t.intake.complaintSub}
                 </p>
                 {isSpeakingQuestion && (
                   <span className="text-[11px] font-semibold text-[#004ac6] bg-[#f3f3fe] px-2.5 py-0.5 rounded-full animate-pulse">
-                    🔊 Playing question audio…
+                    {t.intake.playingAudio}
                   </span>
                 )}
               </div>
@@ -365,14 +350,22 @@ export default function KioskIntakePage() {
               {/* Voice Primary Widget */}
               <div className="bg-white rounded-3xl p-4 border border-[#e1e2ed] shadow-sm flex flex-col items-center gap-2 text-center">
                 <button
-                  onClick={() =>
+                  onClick={() => {
+                    const samples: Record<string, string> = {
+                      mr: 'माझं पोट खूप दुखतंय, विशेषतः जेवल्यानंतर.',
+                      hi: 'मेरे पेट में बहुत दर्द हो रहा है, खासकर खाने के बाद।',
+                      gu: 'મને પેટમાં ખૂબ દુખાવો થાય છે, ખાસ કરીને જમ્યા પછી.',
+                      bn: 'আমার পেটে খুব ব্যথা হচ্ছে, বিশেষ করে খাওয়ার পরে।',
+                      ta: 'எனக்கு வயிறு மிகவும் வலிக்கிறது, குறிப்பாக சாப்பிட்ட பிறகு.',
+                      en: 'My stomach hurts a lot, especially after eating.',
+                    }
                     handleStartVoiceForQuestion(
                       'CHIEF_COMPLAINT',
-                      'Maaza pot khup dukhatoy, khaaskarun jevanaanantar.',
+                      samples[language ?? 'en'] ?? samples.en,
                       'My stomach hurts a lot, especially after eating.',
-                      'Stomach / Digestion'
+                      t.intake.catStomach
                     )
-                  }
+                  }}
                   className="w-16 h-16 rounded-full bg-[#004ac6] text-white flex items-center justify-center shadow-[0_4px_16px_rgba(0,74,198,0.25)] hover:scale-105 active:scale-95 transition-transform"
                   aria-label="Speak symptoms"
                 >
@@ -383,14 +376,15 @@ export default function KioskIntakePage() {
                   </svg>
                 </button>
                 <span className="text-[13px] font-bold text-[#004ac6]">
-                  Tap to speak symptoms
+                  {t.intake.complaintVoicePrompt}
                 </span>
               </div>
+
 
               <div className="flex items-center gap-2">
                 <div className="h-[1px] flex-1 bg-[#e1e2ed]" />
                 <span className="text-[10px] font-bold text-[#737686] uppercase tracking-wider">
-                  Or select category
+                  {t.intake.orSelectCat}
                 </span>
                 <div className="h-[1px] flex-1 bg-[#e1e2ed]" />
               </div>
@@ -398,12 +392,12 @@ export default function KioskIntakePage() {
               {/* Touch Category Grid */}
               <div className="grid grid-cols-2 gap-2.5">
                 {[
-                  { name: 'Stomach / Digestion', hi: 'पेट / पाचन', mr: 'पोट / पचन', icon: '🥣' },
-                  { name: 'Chest / Breathing', hi: 'छाती / साँस', mr: 'छाती / श्वास', icon: '🫀' },
-                  { name: 'Head / Eyes', hi: 'सिर / आँखें', mr: 'डोके / डोळे', icon: '🧠' },
-                  { name: 'Joint / Back Pain', hi: 'जोड़ / पीठ', mr: 'सांधेदुखी / पाठ', icon: '🦴' },
-                  { name: 'Fever / Infection', hi: 'बुखार / संक्रमण', mr: 'ताप / संसर्ग', icon: '🌡️' },
-                  { name: 'Other Symptoms', hi: 'कुछ और', mr: 'इतर समस्या', icon: '➕' },
+                  { name: t.intake.catStomach, icon: '🥣' },
+                  { name: t.intake.catChest, icon: '🫀' },
+                  { name: t.intake.catHead, icon: '🧠' },
+                  { name: t.intake.catJoints, icon: '🦴' },
+                  { name: t.intake.catFever, icon: '🌡️' },
+                  { name: t.intake.catOther, icon: '➕' },
                 ].map((cat) => (
                   <button
                     key={cat.name}
@@ -411,14 +405,9 @@ export default function KioskIntakePage() {
                     className="p-3 bg-white rounded-2xl border-2 border-[#e1e2ed] hover:border-[#004ac6] hover:bg-[#faf8ff] shadow-sm flex items-center gap-2.5 text-left transition-all active:scale-98"
                   >
                     <span className="text-[20px] shrink-0">{cat.icon}</span>
-                    <div className="min-w-0">
-                      <span className="text-[13px] font-bold text-[#191b23] block truncate">
-                        {cat.name}
-                      </span>
-                      <span className="text-[11px] text-[#737686] block truncate">
-                        {language === 'mr' ? cat.mr : cat.hi}
-                      </span>
-                    </div>
+                    <span className="text-[13px] font-bold text-[#191b23] block truncate">
+                      {cat.name}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -426,7 +415,7 @@ export default function KioskIntakePage() {
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              STAGE 3: DURATION & ONSET (Multimodal Refinement)
+              STAGE 3: DURATION & ONSET
           ════════════════════════════════════════════════════════════════════ */}
           {stage === 'DURATION' && (
             <motion.div
@@ -437,11 +426,10 @@ export default function KioskIntakePage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-4"
             >
-              {/* Question Header */}
               <div className="space-y-1 text-center">
                 <div className="flex justify-center items-center gap-2">
                   <h1 className="text-[24px] font-bold text-[#191b23] leading-tight">
-                    When did this problem begin?
+                    {t.intake.durationTitle}
                   </h1>
                   <button
                     onClick={() => handleHearQuestion()}
@@ -454,12 +442,12 @@ export default function KioskIntakePage() {
                     </svg>
                   </button>
                 </div>
-                <p className="text-[16px] text-[#434655]" lang="hi">
-                  यह समस्या कब से है?
+                <p className="text-[14px] text-[#737686]">
+                  {t.intake.durationSub}
                 </p>
                 {isSpeakingQuestion && (
                   <span className="text-[11px] font-semibold text-[#004ac6] bg-[#f3f3fe] px-2.5 py-0.5 rounded-full animate-pulse">
-                    🔊 Playing question audio…
+                    {t.intake.playingAudio}
                   </span>
                 )}
               </div>
@@ -467,48 +455,51 @@ export default function KioskIntakePage() {
               {/* Multimodal Speak Action Bar */}
               <div className="bg-[#f3f3fe] p-3 rounded-2xl border border-[#dbe1ff] flex items-center justify-between">
                 <span className="text-[13px] text-[#434655]">
-                  Regarding: <strong className="text-[#004ac6]">{selectedComplaint}</strong>
+                  {t.intake.durationRegarding} <strong className="text-[#004ac6]">{selectedComplaint}</strong>
                 </span>
                 <button
-                  onClick={() =>
+                  onClick={() => {
+                    const samples: Record<string, string> = {
+                      mr: 'जवळपास १ ते २ आठवड्यांपासून आहे.',
+                      hi: 'लगभग 1 से 2 हफ़्ते से यह समस्या है।',
+                      gu: 'લગભગ ૧ થી ૨ અઠવાડિયાથી આ તકલીફ છે.',
+                      bn: 'প্রায় ১ থেকে ২ সপ্তাহ ধরে এই সমস্যা হচ্ছে।',
+                      ta: 'சுமார் 1 முதல் 2 வாரங்களாக இந்த பிரச்சனை உள்ளது.',
+                      en: 'It has been about 1 to 2 weeks.',
+                    }
                     handleStartVoiceForQuestion(
                       'DURATION',
-                      'Lagbhag ek-don aathavade zhaale.',
+                      samples[language ?? 'en'] ?? samples.en,
                       'It has been about 1 to 2 weeks.',
-                      '1 to 2 weeks'
+                      t.intake.durWeeks
                     )
-                  }
+                  }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#004ac6] text-white rounded-xl text-[12px] font-bold hover:bg-[#003ea8]"
                 >
                   <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                   </svg>
-                  Speak answer
+                  {t.intake.speakAnswer}
                 </button>
               </div>
 
               {/* Touch Options */}
               <div className="flex flex-col gap-2.5">
                 {[
-                  { label: 'Less than 3 days (Acute)', hi: '3 दिन से कम समय से', mr: '३ दिवसांपेक्षा कमी' },
-                  { label: '1 to 2 weeks', hi: '1 से 2 हफ़्ते से', mr: '१ ते २ आठवड्यांपासून' },
-                  { label: 'More than a month (Chronic)', hi: 'एक महीने से अधिक समय से', mr: 'एका महिन्यापेक्षा जास्त' },
-                  { label: 'Comes and goes intermittently', hi: 'रुक-रुक कर होता है', mr: 'कधी कधी अचानक होते' },
+                  t.intake.durAcute,
+                  t.intake.durWeeks,
+                  t.intake.durChronic,
+                  t.intake.durIntermittent,
                 ].map((opt) => (
                   <button
-                    key={opt.label}
-                    onClick={() => handleSelectDuration(opt.label)}
+                    key={opt}
+                    onClick={() => handleSelectDuration(opt)}
                     className="p-3.5 bg-white rounded-2xl border-2 border-[#e1e2ed] hover:border-[#004ac6] hover:bg-[#faf8ff] shadow-sm flex items-center justify-between text-left transition-all active:scale-98"
                   >
-                    <div>
-                      <span className="text-[15px] font-bold text-[#191b23] block">
-                        {opt.label}
-                      </span>
-                      <span className="text-[12px] text-[#737686] block">
-                        {language === 'mr' ? opt.mr : opt.hi}
-                      </span>
-                    </div>
+                    <span className="text-[15px] font-bold text-[#191b23] block">
+                      {opt}
+                    </span>
                     <span className="text-[16px] text-[#004ac6]">→</span>
                   </button>
                 ))}
@@ -518,13 +509,13 @@ export default function KioskIntakePage() {
                 onClick={() => setStage('CHIEF_COMPLAINT')}
                 className="text-[13px] font-semibold text-[#737686] hover:text-[#191b23] py-1 text-left"
               >
-                ← Back to Chief Complaint
+                ← {t.common.back}
               </button>
             </motion.div>
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              STAGE 4: CHARACTER & QUALITY (Multimodal Refinement)
+              STAGE 4: CHARACTER & QUALITY
           ════════════════════════════════════════════════════════════════════ */}
           {stage === 'CHARACTER' && (
             <motion.div
@@ -535,11 +526,10 @@ export default function KioskIntakePage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-4"
             >
-              {/* Question Header */}
               <div className="space-y-1 text-center">
                 <div className="flex justify-center items-center gap-2">
                   <h1 className="text-[24px] font-bold text-[#191b23] leading-tight">
-                    How would you describe the pain?
+                    {t.intake.qualityTitle}
                   </h1>
                   <button
                     onClick={() => handleHearQuestion()}
@@ -552,12 +542,12 @@ export default function KioskIntakePage() {
                     </svg>
                   </button>
                 </div>
-                <p className="text-[16px] text-[#434655]" lang="hi">
-                  यह दर्द कैसा महसूस होता है?
+                <p className="text-[14px] text-[#737686]">
+                  {t.intake.qualitySub}
                 </p>
                 {isSpeakingQuestion && (
                   <span className="text-[11px] font-semibold text-[#004ac6] bg-[#f3f3fe] px-2.5 py-0.5 rounded-full animate-pulse">
-                    🔊 Playing question audio…
+                    {t.intake.playingAudio}
                   </span>
                 )}
               </div>
@@ -565,49 +555,52 @@ export default function KioskIntakePage() {
               {/* Multimodal Speak Action Bar */}
               <div className="bg-[#f3f3fe] p-3 rounded-2xl border border-[#dbe1ff] flex items-center justify-between">
                 <span className="text-[13px] text-[#434655]">
-                  Select or speak the pain feeling
+                  {t.intake.qualityRegarding}
                 </span>
                 <button
-                  onClick={() =>
+                  onClick={() => {
+                    const samples: Record<string, string> = {
+                      mr: 'पोटात खूप जळजळ होते आणि ॲसिडिटी वाटते.',
+                      hi: 'पेट में जलन और एसिडिटी जैसा दर्द है।',
+                      gu: 'પેટમાં ખૂબ બળતરા થાય છે અને એસિડિટી લાગે છે.',
+                      bn: 'পেটে খুব জ্বালাপোড়া ও অ্যাসিডিটি ভাব হচ্ছে।',
+                      ta: 'வயிற்றில் மிகுந்த எரிச்சலும் அசிடிட்டியும் உணரப்படுகிறது.',
+                      en: 'It feels like burning sensation and acidity.',
+                    }
                     handleStartVoiceForQuestion(
                       'CHARACTER',
-                      'Jalan aani aamlatva vaat-te.',
+                      samples[language ?? 'en'] ?? samples.en,
                       'It feels like burning sensation and acidity.',
-                      'Burning sensation / Acidity'
+                      t.intake.qualBurning
                     )
-                  }
+                  }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#004ac6] text-white rounded-xl text-[12px] font-bold hover:bg-[#003ea8]"
                 >
                   <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                   </svg>
-                  Speak answer
+                  {t.intake.speakAnswer}
                 </button>
               </div>
 
               {/* Touch Options */}
               <div className="flex flex-col gap-2.5">
                 {[
-                  { label: 'Burning sensation / Acidity', hi: 'जलन जैसा दर्द', mr: 'जळजळ होणारे दुखणे' },
-                  { label: 'Dull heavy pressure', hi: 'भारीपन या दबाव जैसा', mr: 'जडपणा किंवा दाब' },
-                  { label: 'Sharp / Stabbing pain', hi: 'छुरे जैसा तेज दर्द', mr: 'तीव्र टोचल्यासारखे दुखणे' },
-                  { label: 'Cramping / Spasms', hi: 'मरोड़ या ऐंठन', mr: 'पोटात मुरडा येणे' },
-                  { label: 'Not sure / General discomfort', hi: 'पक्का नहीं पता / बेचैनी', mr: 'नक्की सांगता येत नाही' },
+                  t.intake.qualBurning,
+                  t.intake.qualDull,
+                  t.intake.qualSharp,
+                  t.intake.qualCramp,
+                  t.intake.qualNotSure,
                 ].map((opt) => (
                   <button
-                    key={opt.label}
-                    onClick={() => handleSelectCharacter(opt.label)}
+                    key={opt}
+                    onClick={() => handleSelectCharacter(opt)}
                     className="p-3.5 bg-white rounded-2xl border-2 border-[#e1e2ed] hover:border-[#004ac6] hover:bg-[#faf8ff] shadow-sm flex items-center justify-between text-left transition-all active:scale-98"
                   >
-                    <div>
-                      <span className="text-[15px] font-bold text-[#191b23] block">
-                        {opt.label}
-                      </span>
-                      <span className="text-[12px] text-[#737686] block">
-                        {language === 'mr' ? opt.mr : opt.hi}
-                      </span>
-                    </div>
+                    <span className="text-[15px] font-bold text-[#191b23] block">
+                      {opt}
+                    </span>
                     <span className="text-[16px] text-[#004ac6]">→</span>
                   </button>
                 ))}
@@ -617,13 +610,13 @@ export default function KioskIntakePage() {
                 onClick={() => setStage('DURATION')}
                 className="text-[13px] font-semibold text-[#737686] hover:text-[#191b23] py-1 text-left"
               >
-                ← Back to Duration
+                ← {t.common.back}
               </button>
             </motion.div>
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              STAGE 5: AYUSH & LIFESTYLE (Multimodal Refinement)
+              STAGE 5: AYUSH & LIFESTYLE
           ════════════════════════════════════════════════════════════════════ */}
           {stage === 'AYUSH_LIFESTYLE' && (
             <motion.div
@@ -634,11 +627,10 @@ export default function KioskIntakePage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-4"
             >
-              {/* Question Header */}
               <div className="space-y-1 text-center">
                 <div className="flex justify-center items-center gap-2">
                   <h1 className="text-[24px] font-bold text-[#191b23] leading-tight">
-                    Does food or routine affect your symptoms?
+                    {t.intake.lifestyleTitle}
                   </h1>
                   <button
                     onClick={() => handleHearQuestion()}
@@ -651,12 +643,12 @@ export default function KioskIntakePage() {
                     </svg>
                   </button>
                 </div>
-                <p className="text-[16px] text-[#434655]" lang="hi">
-                  क्या भोजन या दिनचर्या से असर पड़ता है?
+                <p className="text-[14px] text-[#737686]">
+                  {t.intake.lifestyleSub}
                 </p>
                 {isSpeakingQuestion && (
                   <span className="text-[11px] font-semibold text-[#006a61] bg-[#f0fdfa] px-2.5 py-0.5 rounded-full animate-pulse">
-                    🔊 Playing question audio…
+                    {t.intake.playingAudio}
                   </span>
                 )}
               </div>
@@ -664,48 +656,51 @@ export default function KioskIntakePage() {
               {/* Multimodal Speak Action Bar */}
               <div className="bg-[#f0fdfa] p-3 rounded-2xl border border-[#99f6e4] flex items-center justify-between">
                 <span className="text-[13px] text-[#006a61] font-medium">
-                  Ahara / Vihara (Dietary factor)
+                  {t.intake.lifestyleTag}
                 </span>
                 <button
-                  onClick={() =>
+                  onClick={() => {
+                    const samples: Record<string, string> = {
+                      mr: 'तिखट आणि तेलकट जेवल्यानंतर पोटात जास्त त्रास होतो.',
+                      hi: 'मसालेदार और तला हुआ खाना खाने के बाद दर्द बढ़ता है।',
+                      gu: 'તીખું અને તળેલું જમ્યા પછી પેટમાં વધુ તકલીફ થાય છે.',
+                      bn: 'ঝাল ও তৈলাক্ত খাবার খাওয়ার পর পেটের কষ্ট বাড়ে।',
+                      ta: 'காரமான மற்றும் எண்ணெய்ப் பொருட்கள் சாப்பிட்ட பின் வலி அதிகமாகிறது.',
+                      en: 'Hurts more after spicy and oily food.',
+                    }
                     handleStartVoiceForQuestion(
                       'AYUSH_LIFESTYLE',
-                      'Tikhat jevlyavar aani telkat khalyavar dukhate.',
+                      samples[language ?? 'en'] ?? samples.en,
                       'Hurts more after spicy and oily food.',
-                      'Worse after spicy, oily, or heavy meals'
+                      t.intake.lifeSpicy
                     )
-                  }
+                  }}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#006a61] text-white rounded-xl text-[12px] font-bold hover:bg-[#005049]"
                 >
                   <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                   </svg>
-                  Speak answer
+                  {t.intake.speakAnswer}
                 </button>
               </div>
 
               {/* Touch Options */}
               <div className="flex flex-col gap-2.5">
                 {[
-                  { label: 'Worse after spicy, oily, or heavy meals', hi: 'मसालेदार या तले खाने के बाद बढ़ता है', mr: 'तिखट किंवा तेलकट जेवणानंतर त्रास वाढतो' },
-                  { label: 'Worse on an empty stomach / fasting', hi: 'खाली पेट रहने पर अधिक होता है', mr: 'उपाशी पोटी त्रास जास्त होतो' },
-                  { label: 'Worse with stress or irregular sleep', hi: 'तनाव या नींद की कमी से बढ़ता है', mr: 'ताणतणाव किंवा झोपेच्या अभावाने वाढतो' },
-                  { label: 'No specific food or routine pattern', hi: 'कोई खास असर नहीं दिखता', mr: 'काही विशिष्ट फरक पडत नाही' },
+                  t.intake.lifeSpicy,
+                  t.intake.lifeFasting,
+                  t.intake.lifeStress,
+                  t.intake.lifeNoPattern,
                 ].map((opt) => (
                   <button
-                    key={opt.label}
-                    onClick={() => handleSelectLifestyle(opt.label)}
+                    key={opt}
+                    onClick={() => handleSelectLifestyle(opt)}
                     className="p-3.5 bg-white rounded-2xl border-2 border-[#e1e2ed] hover:border-[#006a61] hover:bg-[#f0fdfa] shadow-sm flex items-center justify-between text-left transition-all active:scale-98"
                   >
-                    <div>
-                      <span className="text-[15px] font-bold text-[#191b23] block">
-                        {opt.label}
-                      </span>
-                      <span className="text-[12px] text-[#737686] mt-0.5 block">
-                        {language === 'mr' ? opt.mr : opt.hi}
-                      </span>
-                    </div>
+                    <span className="text-[15px] font-bold text-[#191b23] block">
+                      {opt}
+                    </span>
                     <span className="text-[16px] text-[#006a61]">→</span>
                   </button>
                 ))}
@@ -715,7 +710,7 @@ export default function KioskIntakePage() {
                 onClick={() => setStage('CHARACTER')}
                 className="text-[13px] font-semibold text-[#737686] hover:text-[#191b23] py-1 text-left"
               >
-                ← Back to Pain Quality
+                ← {t.common.back}
               </button>
             </motion.div>
           )}
@@ -732,7 +727,6 @@ export default function KioskIntakePage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-5 text-center"
             >
-              {/* Badge */}
               <div className="w-16 h-16 rounded-full bg-[#006a61] text-white flex items-center justify-center mx-auto shadow-md">
                 <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polyline points="20 6 9 17 4 12" />
@@ -741,13 +735,13 @@ export default function KioskIntakePage() {
 
               <div className="space-y-1">
                 <span className="text-[13px] font-bold text-[#006a61] tracking-wider uppercase">
-                  Assessment Synthesized
+                  Vaidya Intake Complete
                 </span>
                 <h1 className="text-[28px] font-bold text-[#191b23]">
-                  Clinical Intake Summary
+                  {t.intake.summaryTitle}
                 </h1>
                 <p className="text-[14px] text-[#737686]">
-                  Prepared for your consulting physician.
+                  {t.intake.summarySubtitle}
                 </p>
               </div>
 
@@ -761,32 +755,32 @@ export default function KioskIntakePage() {
                 </div>
 
                 <div className="flex justify-between items-start">
-                  <span className="text-[#737686]">Chief Complaint:</span>
+                  <span className="text-[#737686]">{t.intake.timelineComplaint}:</span>
                   <span className="font-bold text-[#191b23] text-right">{selectedComplaint}</span>
                 </div>
 
                 <div className="flex justify-between items-start">
-                  <span className="text-[#737686]">Onset &amp; Duration:</span>
+                  <span className="text-[#737686]">{t.intake.timelineDuration}:</span>
                   <span className="font-semibold text-[#191b23] text-right">{selectedDuration}</span>
                 </div>
 
                 <div className="flex justify-between items-start">
-                  <span className="text-[#737686]">Quality / Character:</span>
+                  <span className="text-[#737686]">{t.intake.timelineQuality}:</span>
                   <span className="font-semibold text-[#191b23] text-right">{selectedCharacter}</span>
                 </div>
 
                 <div className="flex justify-between items-start">
-                  <span className="text-[#737686]">Dietary Trigger:</span>
+                  <span className="text-[#737686]">{t.intake.timelineLifestyle}:</span>
                   <span className="font-semibold text-[#006a61] text-right">{selectedLifestyle}</span>
                 </div>
 
                 <div className="mt-2 p-2.5 bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl flex items-center gap-2 text-[12px] text-[#15803d]">
-                  <span className="font-bold">✓ Triage Category:</span>
-                  <span>Routine OPD Consultation (No acute red flags)</span>
+                  <span className="font-bold">✓</span>
+                  <span>{t.intake.triageNotice}</span>
                 </div>
               </div>
 
-              {/* Phase 4 Handoff CTAs */}
+              {/* CTAs */}
               <div className="flex flex-col gap-3 pt-2">
                 <KioskButton
                   variant="primary"
@@ -796,7 +790,7 @@ export default function KioskIntakePage() {
                     router.push('/kiosk/documents')
                   }}
                 >
-                  Proceed to Medical Documents →
+                  {t.intake.proceedToDocs}
                 </KioskButton>
 
                 <div className="flex gap-2">
@@ -806,7 +800,7 @@ export default function KioskIntakePage() {
                     className="flex-1"
                     onClick={() => setStage('CHIEF_COMPLAINT')}
                   >
-                    Edit Answers
+                    {t.intake.editAnswers}
                   </KioskButton>
                   <KioskButton
                     variant="ghost"
@@ -817,7 +811,7 @@ export default function KioskIntakePage() {
                       router.replace('/kiosk')
                     }}
                   >
-                    Start Over
+                    {t.common.startOver}
                   </KioskButton>
                 </div>
               </div>
@@ -849,8 +843,8 @@ export default function KioskIntakePage() {
                       </div>
                     </div>
                     <div>
-                      <h2 className="text-[22px] font-bold text-[#191b23]">Listening to your voice…</h2>
-                      <p className="text-[14px] text-[#737686] mt-1">Speak clearly in Hindi, Marathi, or English.</p>
+                      <h2 className="text-[22px] font-bold text-[#191b23]">{t.intake.voiceModalListening}</h2>
+                      <p className="text-[14px] text-[#737686] mt-1">{t.intake.voiceModalListeningDesc}</p>
                     </div>
                   </>
                 )}
@@ -858,14 +852,14 @@ export default function KioskIntakePage() {
                 {voiceModal === 'PROCESSING' && (
                   <div className="py-6 flex flex-col items-center gap-3">
                     <div className="w-10 h-10 rounded-full border-4 border-[#004ac6] border-t-transparent animate-spin" />
-                    <h2 className="text-[18px] font-bold text-[#191b23]">Transcribing speech…</h2>
+                    <h2 className="text-[18px] font-bold text-[#191b23]">{t.intake.voiceModalTranscribing}</h2>
                   </div>
                 )}
 
                 {voiceModal === 'CONFIRMING' && (
                   <div className="w-full flex flex-col gap-4">
                     <span className="text-[11px] font-bold text-[#004ac6] uppercase tracking-wider">
-                      Voice Recognition Result
+                      {t.intake.voiceResultTitle}
                     </span>
                     <div className="bg-[#f3f3fe] p-4 rounded-2xl border border-[#dbe1ff] text-left">
                       <p className="text-[16px] font-bold text-[#191b23] italic">
@@ -877,7 +871,7 @@ export default function KioskIntakePage() {
                       </p>
                     </div>
                     <div className="bg-[#f0fdf4] p-3 rounded-xl border border-[#bbf7d0] text-left text-[13px] text-[#15803d]">
-                      <span>Matched Option: <strong>{matchedOption}</strong></span>
+                      <span>{t.intake.matchedOption} <strong>{matchedOption}</strong></span>
                     </div>
 
                     <div className="flex flex-col gap-2 w-full pt-1">
@@ -886,14 +880,14 @@ export default function KioskIntakePage() {
                         size="full"
                         onClick={handleConfirmVoiceAnswer}
                       >
-                        Accept Answer &amp; Continue →
+                        {t.intake.acceptAnswer}
                       </KioskButton>
                       <KioskButton
                         variant="ghost"
                         size="full"
                         onClick={() => setVoiceModal('IDLE')}
                       >
-                        Cancel / Choose by Touch
+                        {t.intake.cancelTouch}
                       </KioskButton>
                     </div>
                   </div>

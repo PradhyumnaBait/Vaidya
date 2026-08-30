@@ -16,6 +16,7 @@
 
 import { useEffect, useRef } from 'react'
 import { KioskButton } from './kiosk-button'
+import { useKioskTranslation } from '@/lib/hooks/use-kiosk-translation'
 
 interface SessionTimeoutOverlayProps {
   secondsRemaining: number
@@ -28,6 +29,7 @@ export function SessionTimeoutOverlay({
   onContinue,
   onEnd,
 }: SessionTimeoutOverlayProps) {
+  const { t } = useKioskTranslation()
   const continueRef = useRef<HTMLButtonElement>(null)
 
   // Auto-focus the continue button when overlay appears
@@ -75,15 +77,15 @@ export function SessionTimeoutOverlay({
             id="timeout-title"
             className="text-[22px] font-semibold text-[#191b23] leading-snug"
           >
-            Are you still there?
+            {t.timeout.warningTitle}
           </h2>
           <p
             id="timeout-body"
             className="text-[15px] text-[#434655] leading-relaxed"
           >
-            Your session will reset automatically in{' '}
+            {t.timeout.warningDesc}{' '}
             <span aria-live="polite" aria-atomic="true" className="font-semibold text-[#004ac6]">
-              {secondsRemaining} second{secondsRemaining !== 1 ? 's' : ''}
+              {secondsRemaining} {t.timeout.secondsLeft}
             </span>
             .
           </p>
@@ -97,21 +99,16 @@ export function SessionTimeoutOverlay({
             size="full"
             onClick={onContinue}
           >
-            Continue Session
+            {t.timeout.continueButton}
           </KioskButton>
           <KioskButton
             variant="ghost"
             size="full"
             onClick={onEnd}
           >
-            End Session
+            {t.timeout.endButton}
           </KioskButton>
         </div>
-
-        {/* Privacy note */}
-        <p className="text-[12px] text-[#a1a1aa] text-center leading-relaxed">
-          For your privacy, all session data will be cleared before the next patient.
-        </p>
       </div>
     </div>
   )

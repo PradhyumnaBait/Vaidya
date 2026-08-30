@@ -4,54 +4,37 @@
  *
  * Route: /kiosk/language
  *
- * Stitch reference: welcome_language_selection_animated (primary)
- *                   welcome_language_selection (fallback reference)
- *                   welcome_language_selection_desktop (layout reference)
- *
- * Visual refinements over Stitch:
- * - Stagger-animated tile entrance (motion-safe, reduced-motion respects opacity=1)
- * - Larger tiles (88px min-height vs Stitch ~56px) — hospital kiosk standing distance
- * - 3-column grid on landscape, 2-column on portrait/narrow (vs Stitch 2-col only)
- * - Selected state: solid blue bg, white text, checkmark (matches Stitch intent)
- * - Continue button: sticky to bottom, slides up on first selection
- * - Bilingual instruction line (EN + HI from Stitch)
- * - Multilingual heading stack (Welcome / स्वागत है / स्वागत आहे)
- * - "Hear instructions" audio affordance (UI only, Phase 1)
- *
- * Accessibility:
- * - role="radiogroup" wrapping all language tiles
- * - Each tile: role="radio", aria-checked
- * - Continue button aria-disabled until selection made
- * - Language heading labeled for screen readers
- * - Focus management: first tile gets focus on mount
- *
- * State:
- * - Selected language → useKioskStore.setLanguage()
- * - Navigate to /kiosk/identify on Continue
+ * Multilingual Architecture:
+ * - Dynamic strings from useKioskTranslation()
+ * - Selecting language immediately updates kioskStore language state
+ * - Continue button label instantly adapts to selected language
  */
 
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKioskStore } from '@/store/kiosk.store'
+import { useKioskTranslation } from '@/lib/hooks/use-kiosk-translation'
 import { LanguageTile } from '@/components/kiosk/language-tile'
 import { KioskButton } from '@/components/kiosk/kiosk-button'
 import { KIOSK_LANGUAGES } from '@/lib/kiosk-localization'
 import type { Language } from '@/types'
 
-// Stagger delay per tile (ms) — matches Stitch animated reference (200–530ms range)
+// Stagger delay per tile (ms)
 const TILE_STAGGER_BASE = 180
 const TILE_STAGGER_STEP = 35
 
-// Heading stack: cascading opacity (from Stitch welcome_language_selection_animated)
+// Heading stack: cascading opacity
 const HEADING_LINES = [
   { text: 'Welcome',      opacity: 1.0,  lang: 'en' },
-  { text: 'स्वागत है',   opacity: 0.70, lang: 'hi' },
-  { text: 'स्वागत आहे',  opacity: 0.45, lang: 'mr' },
+  { text: 'स्वागत है',   opacity: 0.75, lang: 'hi' },
+  { text: 'સ્વાગત છે · স্বাগতম · வரவேற்பு',  opacity: 0.50, lang: 'gu' },
 ]
+
 
 export default function KioskLanguagePage() {
   const router = useRouter()
+  const { t } = useKioskTranslation()
   const { language: storedLang, setLanguage, advanceStep, updateActivity } = useKioskStore()
   const [selected, setSelected] = useState<Language | null>(storedLang)
   const [isContinuing, setIsContinuing] = useState(false)
@@ -70,8 +53,6 @@ export default function KioskLanguagePage() {
     if (!selected || isContinuing) return
     setIsContinuing(true)
     advanceStep('IDENTIFY')
-    // Navigate to next step (Phase 2 will implement /kiosk/identify)
-    // For now: route to a placeholder (will add in next phases)
     router.push('/kiosk/identify')
   }, [selected, isContinuing, advanceStep, router])
 
@@ -119,7 +100,7 @@ export default function KioskLanguagePage() {
               lang={line.lang}
               className="text-[34px] font-bold text-[#191b23] leading-snug motion-safe:animate-[kiosk-slide-fade-up_0.4s_ease-out_forwards] opacity-0"
               style={{
-                opacity: 0, // will be overridden by animation
+                opacity: 0,
                 animationDelay: `${i * 60}ms`,
                 ['--final-opacity' as string]: line.opacity,
               }}
@@ -129,13 +110,13 @@ export default function KioskLanguagePage() {
           ))}
         </div>
 
-        {/* Bilingual instruction */}
+        {/* Localized instruction */}
         <div className="flex flex-col items-center text-center gap-1">
-          <p className="text-[16px] text-[#191b23] font-medium">
-            Select your language to continue
+          <p className="text-[16px] text-[#191b23] font-semibold">
+            {t.language.title}
           </p>
-          <p className="text-[15px] text-[#434655]" lang="hi">
-            आगे बढ़ने के लिए अपनी भाषा चुनें
+          <p className="text-[14px] text-[#737686]">
+            {t.language.instructions}
           </p>
         </div>
 
@@ -157,25 +138,9 @@ export default function KioskLanguagePage() {
           ))}
         </div>
 
-        {/* Audio assistance affordance */}
-        <div className="flex justify-center">
-          <button
-            className="flex items-center gap-2 text-[#004ac6] text-[14px] font-medium px-6 py-3 rounded-full bg-[#f3f3fe] hover:bg-[#ededf9] transition-colors active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004ac6]/40"
-            aria-label="Hear instructions in selected language (audio assistance)"
-            onClick={() => {
-              // TODO Phase 2: Trigger TTS via Bhashini API
-            }}
-          >
-            <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none" aria-hidden="true">
-              <path d="M9 3.5a.5.5 0 00-.8-.4L4.6 6H2a1 1 0 00-1 1v6a1 1 0 001 1h2.6l3.6 2.9a.5.5 0 00.8-.4V3.5zM14.07 5.93a7 7 0 010 8.14M16.24 3.76a10 10 0 010 12.48" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            Hear instructions
-          </button>
-        </div>
-
         {/* Help note */}
         <p className="text-center text-[13px] text-[#737686]">
-          Need help? Ask our staff
+          {t.common.staffHelp}
         </p>
       </div>
 
@@ -198,16 +163,9 @@ export default function KioskLanguagePage() {
                 size="fullLg"
                 onClick={handleContinue}
                 isLoading={isContinuing}
-                aria-label={`Continue with ${selected ? KIOSK_LANGUAGES.find((l) => l.code === selected)?.english : 'selected language'}`}
+                aria-label={`Continue in selected language`}
               >
-                {isContinuing ? null : (
-                  <>
-                    Continue
-                    <svg viewBox="0 0 20 20" className="w-5 h-5" fill="none" aria-hidden="true">
-                      <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </>
-                )}
+                {isContinuing ? null : t.language.confirmButton}
               </KioskButton>
             </div>
           </motion.div>

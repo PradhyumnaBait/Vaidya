@@ -41,6 +41,8 @@ const STEP_PROGRESS: Partial<Record<KioskStep, number>> = {
   COMPLETE: 100,
 }
 
+import type { SupportedKioskLanguage } from '@/lib/translations/kiosk-translations'
+
 export function KioskHeader({ step, language, progressPercent, className }: KioskHeaderProps) {
   const { setLanguage, updateActivity } = useKioskStore()
   const isActive = ACTIVE_STEPS.includes(step)
@@ -48,10 +50,11 @@ export function KioskHeader({ step, language, progressPercent, className }: Kios
 
   const activeLang = language ?? 'en'
 
-  const handleLangChange = (newLang: 'en' | 'hi' | 'mr') => {
+  const handleLangChange = (newLang: SupportedKioskLanguage) => {
     updateActivity()
     setLanguage(newLang)
   }
+
 
   return (
     <header
@@ -89,48 +92,33 @@ export function KioskHeader({ step, language, progressPercent, className }: Kios
         {/* Right: Dynamic in-session Language Switcher */}
         <div className="shrink-0 flex items-center gap-2">
           {isActive && (
-            <div className="flex items-center bg-[#ededf9] rounded-xl p-1 gap-1 border border-[#c3c6d7]/40">
-              <button
-                type="button"
-                onClick={() => handleLangChange('en')}
-                className={cn(
-                  'px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all',
-                  activeLang === 'en'
-                    ? 'bg-[#004ac6] text-white shadow-xs'
-                    : 'text-[#434655] hover:text-[#191b23]'
-                )}
-                aria-label="Switch interface to English"
-              >
-                EN
-              </button>
-              <button
-                type="button"
-                onClick={() => handleLangChange('hi')}
-                className={cn(
-                  'px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all',
-                  activeLang === 'hi'
-                    ? 'bg-[#004ac6] text-white shadow-xs'
-                    : 'text-[#434655] hover:text-[#191b23]'
-                )}
-                aria-label="Switch interface to Hindi"
-              >
-                हिंदी
-              </button>
-              <button
-                type="button"
-                onClick={() => handleLangChange('mr')}
-                className={cn(
-                  'px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all',
-                  activeLang === 'mr'
-                    ? 'bg-[#004ac6] text-white shadow-xs'
-                    : 'text-[#434655] hover:text-[#191b23]'
-                )}
-                aria-label="Switch interface to Marathi"
-              >
-                मराठी
-              </button>
+            <div className="flex items-center bg-[#ededf9] rounded-xl p-0.5 sm:p-1 gap-0.5 sm:gap-1 border border-[#c3c6d7]/40 max-w-[340px] sm:max-w-none overflow-x-auto">
+              {[
+                { code: 'en' as const, label: 'EN' },
+                { code: 'hi' as const, label: 'हिंदी' },
+                { code: 'mr' as const, label: 'मराठी' },
+                { code: 'gu' as const, label: 'ગુજરાતી' },
+                { code: 'bn' as const, label: 'বাংলা' },
+                { code: 'ta' as const, label: 'தமிழ்' },
+              ].map((item) => (
+                <button
+                  key={item.code}
+                  type="button"
+                  onClick={() => handleLangChange(item.code)}
+                  className={cn(
+                    'px-2 sm:px-2.5 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-bold transition-all whitespace-nowrap',
+                    activeLang === item.code
+                      ? 'bg-[#004ac6] text-white shadow-xs'
+                      : 'text-[#434655] hover:text-[#191b23]'
+                  )}
+                  aria-label={`Switch interface to ${item.label}`}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           )}
+
 
           <div className="hidden sm:flex items-center gap-1.5 text-[#a1a1aa] pl-1">
             <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" aria-hidden="true">

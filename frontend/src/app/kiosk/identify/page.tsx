@@ -1,6 +1,6 @@
 'use client'
 /**
- * K-03 — Patient Identification & Demographic Confirmation (Phase 2)
+ * K-03 — Patient Identification & Demographic Confirmation (Phase 2 + Multilingual)
  *
  * Flow:
  * 1. SELECT_METHOD: Scan ABHA QR, Enter Health ID/Mobile, or Register as New Patient
@@ -11,15 +11,15 @@
  * 6. NEW_PATIENT_FORM: Minimal touch-friendly registration form (Stitch p_03)
  * 7. NEW_PATIENT_SUCCESS: Confirmation of newly created profile
  *
- * Navigation:
- * - Back button returns to /kiosk/language
- * - Successful confirmation / registration handoffs to /kiosk/consent (Phase 3)
+ * Multilingual Architecture:
+ * - Powered by useKioskTranslation() for complete EN, HI, MR translations.
  */
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKioskStore } from '@/store/kiosk.store'
+import { useKioskTranslation } from '@/lib/hooks/use-kiosk-translation'
 import { KioskButton } from '@/components/kiosk/kiosk-button'
 import { kioskService } from '@/services/kiosk.service'
 import type { Language } from '@/types'
@@ -39,6 +39,7 @@ type ManualEntryType = 'ABHA' | 'MOBILE'
 
 export default function KioskIdentifyPage() {
   const router = useRouter()
+  const { t } = useKioskTranslation()
   const { language, advanceStep, setPatientData, updateActivity } = useKioskStore()
 
   const [view, setView] = useState<IdentifyView>('SELECT_METHOD')
@@ -85,12 +86,10 @@ export default function KioskIdentifyPage() {
       updateActivity()
 
       try {
-        // Clean digits
         const cleanQuery = query.replace(/\D/g, '')
 
         let patient = null
         if (type === 'ABHA') {
-          // Format as XX-XXXX-XXXX-XXXX for demo lookup matching if needed
           const abhaMatch = DEMO_PATIENTS.find(
             (p) => p.abhaNumber?.replace(/\D/g, '') === cleanQuery || p.abhaNumber === query
           )
@@ -132,16 +131,16 @@ export default function KioskIdentifyPage() {
             }
             handleSelectPatient(fallback, true)
           } else {
-            setSearchError('No existing records found with this number. Please check and try again or register as a new patient.')
+            setSearchError(t.identify.errLookup)
             setView('MANUAL_ENTRY')
           }
         }
       } catch {
-        setSearchError('Unable to connect to hospital registry. Please try again.')
+        setSearchError(t.identify.errLookup)
         setView('MANUAL_ENTRY')
       }
     },
-    [handleSelectPatient, updateActivity]
+    [handleSelectPatient, t.identify.errLookup, updateActivity]
   )
 
   // ── Keypad Input Handlers ───────────────────────────────────────────────────
@@ -162,7 +161,6 @@ export default function KioskIdentifyPage() {
 
     const nextRaw = raw + key
     if (manualType === 'ABHA') {
-      // Format as XX-XXXX-XXXX-XXXX
       let formatted = nextRaw
       if (nextRaw.length > 2) formatted = `${nextRaw.slice(0, 2)}-${nextRaw.slice(2)}`
       if (nextRaw.length > 6) formatted = `${nextRaw.slice(0, 2)}-${nextRaw.slice(2, 6)}-${nextRaw.slice(6)}`
@@ -180,21 +178,21 @@ export default function KioskIdentifyPage() {
     updateActivity()
 
     if (!newName.trim()) {
-      setFormError('Please enter your full name.')
+      setFormError(t.identify.errName)
       return
     }
     const ageVal = ageMode === 'AGE' ? parseInt(newAge, 10) : 30
     if (ageMode === 'AGE' && (!newAge || isNaN(ageVal) || ageVal < 1 || ageVal > 120)) {
-      setFormError('Please enter a valid age between 1 and 120.')
+      setFormError(t.identify.errAge)
       return
     }
     if (ageMode === 'DOB' && !newDob) {
-      setFormError('Please select your date of birth.')
+      setFormError(t.identify.errDob)
       return
     }
     const cleanPhone = newPhone.replace(/\D/g, '')
     if (!cleanPhone || cleanPhone.length < 10) {
-      setFormError('Please enter a valid 10-digit mobile number.')
+      setFormError(t.identify.errPhone)
       return
     }
 
@@ -221,13 +219,11 @@ export default function KioskIdentifyPage() {
 
       handleSelectPatient(newPatientRecord, false)
     } catch {
-      setFormError('Failed to register. Please ask a staff member for assistance.')
+      setFormError(t.common.staffHelp)
     } finally {
       setIsSubmitting(false)
     }
   }
-
-  // ── Continue to Consent / Phase 3 ────────────────────────────────────────────
 
   const handleProceedToConsent = () => {
     advanceStep('CONSENT')
@@ -257,16 +253,13 @@ export default function KioskIdentifyPage() {
               {/* Header Title */}
               <div className="flex flex-col text-center gap-1.5">
                 <span className="text-[13px] font-bold text-[#004ac6] tracking-wider uppercase">
-                  Patient Identification
+                  {t.identify.title}
                 </span>
-                <h1 className="text-[32px] font-bold text-[#191b23] leading-tight">
-                  Let&apos;s find your records
+                <h1 className="text-[30px] font-bold text-[#191b23] leading-tight">
+                  {t.identify.title}
                 </h1>
-                <p className="text-[20px] text-[#434655]" lang="hi">
-                  आपका पहचान पत्र
-                </p>
-                <p className="text-[15px] text-[#737686] mt-1">
-                  Choose one of the options below to find your medical history.
+                <p className="text-[15px] text-[#737686] mt-0.5">
+                  {t.identify.titleSub}
                 </p>
               </div>
 
@@ -290,15 +283,15 @@ export default function KioskIdentifyPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-[18px] font-bold text-[#191b23]">
-                        Scan ABHA QR Code
+                      <h2 className="text-[17px] font-bold text-[#191b23]">
+                        {t.identify.methodAbha}
                       </h2>
                       <span className="bg-[#86f2e4]/40 text-[#005049] text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        Fastest
+                        {t.identify.fastestBadge}
                       </span>
                     </div>
                     <p className="text-[13px] text-[#737686] mt-0.5 truncate">
-                      Aarogya Setu app, ABHA card, or hospital slip
+                      {t.identify.methodAbhaDesc}
                     </p>
                   </div>
                   <svg viewBox="0 0 20 20" className="w-5 h-5 text-[#737686] group-hover:text-[#004ac6] group-hover:translate-x-1 transition-all shrink-0" fill="none">
@@ -323,11 +316,11 @@ export default function KioskIdentifyPage() {
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-[18px] font-bold text-[#191b23]">
-                      Enter Health ID or Mobile
+                    <h2 className="text-[17px] font-bold text-[#191b23]">
+                      {t.identify.methodPhone}
                     </h2>
                     <p className="text-[13px] text-[#737686] mt-0.5 truncate">
-                      14-digit ABHA number or 10-digit registered number
+                      {t.identify.methodPhoneDesc}
                     </p>
                   </div>
                   <svg viewBox="0 0 20 20" className="w-5 h-5 text-[#737686] group-hover:text-[#004ac6] group-hover:translate-x-1 transition-all shrink-0" fill="none">
@@ -354,15 +347,15 @@ export default function KioskIdentifyPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-[18px] font-bold text-[#191b23]">
-                        I&apos;m a new patient
+                      <h2 className="text-[17px] font-bold text-[#191b23]">
+                        {t.identify.methodNew}
                       </h2>
                       <span className="bg-[#ededf9] text-[#434655] text-[11px] font-semibold px-2 py-0.5 rounded-md">
-                        2 min
+                        {t.identify.timeBadge}
                       </span>
                     </div>
                     <p className="text-[13px] text-[#737686] mt-0.5 truncate">
-                      First hospital visit? We will register your profile.
+                      {t.identify.methodNewDesc}
                     </p>
                   </div>
                   <svg viewBox="0 0 20 20" className="w-5 h-5 text-[#737686] group-hover:text-[#004ac6] group-hover:translate-x-1 transition-all shrink-0" fill="none">
@@ -371,10 +364,10 @@ export default function KioskIdentifyPage() {
                 </button>
               </div>
 
-              {/* Demo Quick Pick Bar for Test Evaluation */}
+              {/* Demo Profiles Bar */}
               <div className="bg-[#f3f3fe] border border-[#dbe1ff] rounded-2xl p-4 flex flex-col gap-2.5">
                 <span className="text-[11px] font-bold text-[#004ac6] tracking-wider uppercase">
-                  ⚡ Quick Demo Evaluation Profiles
+                  ⚡ Demo Profiles
                 </span>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
@@ -431,24 +424,17 @@ export default function KioskIdentifyPage() {
                 </div>
               </div>
 
-              {/* Navigation Back & Privacy Note */}
+              {/* Navigation Back */}
               <div className="flex items-center justify-between pt-2">
                 <button
                   onClick={() => router.push('/kiosk/language')}
                   className="text-[14px] font-semibold text-[#434655] hover:text-[#191b23] flex items-center gap-1.5 py-2 px-3 rounded-lg hover:bg-[#ededf9] transition-colors"
                 >
-                  <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none">
-                    <path d="M13 4l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Back to Language
+                  ← {t.common.back}
                 </button>
 
                 <div className="flex items-center gap-1.5 text-[12px] text-[#737686]">
-                  <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 text-[#006a61]" fill="none">
-                    <rect x="2" y="7" width="12" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-                    <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                  <span>Encrypted & Private</span>
+                  <span>🔒 {t.common.secure}</span>
                 </div>
               </div>
             </motion.div>
@@ -467,17 +453,16 @@ export default function KioskIdentifyPage() {
               className="flex flex-col items-center gap-6"
             >
               <div className="text-center">
-                <h1 className="text-[28px] font-bold text-[#191b23]">
-                  Scan your ABHA QR Code
+                <h1 className="text-[26px] font-bold text-[#191b23]">
+                  {t.identify.scanQrTitle}
                 </h1>
-                <p className="text-[15px] text-[#737686] mt-1">
-                  Position your QR code in front of the kiosk optical scanner below.
+                <p className="text-[14px] text-[#737686] mt-1">
+                  {t.identify.scanQrDesc}
                 </p>
               </div>
 
-              {/* Viewfinder simulation */}
-              <div className="relative w-[300px] h-[300px] bg-[#191b23] rounded-3xl overflow-hidden shadow-xl flex items-center justify-center border-4 border-[#ededf9]">
-                {/* Camera crosshairs & corners */}
+              {/* Viewfinder */}
+              <div className="relative w-[280px] h-[280px] bg-[#191b23] rounded-3xl overflow-hidden shadow-xl flex items-center justify-center border-4 border-[#ededf9]">
                 <div className="absolute inset-6 border-2 border-white/20 rounded-2xl pointer-events-none flex flex-col justify-between p-2">
                   <div className="flex justify-between">
                     <div className="w-6 h-6 border-t-4 border-l-4 border-[#004ac6] -mt-1 -ml-1 rounded-tl" />
@@ -489,15 +474,13 @@ export default function KioskIdentifyPage() {
                   </div>
                 </div>
 
-                {/* Animated Green Laser Scanline */}
                 <div
                   className="absolute left-6 right-6 h-[3px] bg-[#6bd8cb] shadow-[0_0_12px_#6bd8cb] motion-safe:animate-bounce"
                   style={{ animationDuration: '2s' }}
                 />
 
-                {/* Center sample QR icon */}
                 <div className="text-white/40 flex flex-col items-center gap-2">
-                  <svg viewBox="0 0 24 24" className="w-16 h-16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <svg viewBox="0 0 24 24" className="w-14 h-14" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <rect x="3" y="3" width="7" height="7" />
                     <rect x="14" y="3" width="7" height="7" />
                     <rect x="3" y="14" width="7" height="7" />
@@ -507,7 +490,7 @@ export default function KioskIdentifyPage() {
                 </div>
               </div>
 
-              {/* Simulation CTA for Quick Demo */}
+              {/* Simulation CTA */}
               <div className="flex flex-col gap-3 w-full max-w-[400px]">
                 <KioskButton
                   variant="primary"
@@ -516,7 +499,7 @@ export default function KioskIdentifyPage() {
                     performLookup('12-3456-7890-1234', 'ABHA')
                   }}
                 >
-                  Simulate QR Detection (Dhananjay Patil)
+                  {t.identify.simScanBtn}
                 </KioskButton>
 
                 <KioskButton
@@ -527,7 +510,7 @@ export default function KioskIdentifyPage() {
                     updateActivity()
                   }}
                 >
-                  ← Back to Options
+                  ← {t.common.back}
                 </KioskButton>
               </div>
             </motion.div>
@@ -545,17 +528,16 @@ export default function KioskIdentifyPage() {
               transition={{ duration: 0.2 }}
               className="flex flex-col gap-5"
             >
-              {/* Heading */}
               <div className="text-center">
-                <h1 className="text-[26px] font-bold text-[#191b23]">
-                  Enter your identification number
+                <h1 className="text-[24px] font-bold text-[#191b23]">
+                  {manualType === 'ABHA' ? t.identify.enterAbha : t.identify.enterPhone}
                 </h1>
-                <p className="text-[14px] text-[#737686] mt-0.5">
-                  Use the touch keypad or type directly.
+                <p className="text-[13px] text-[#737686] mt-0.5">
+                  {t.identify.titleSub}
                 </p>
               </div>
 
-              {/* Switcher Tab: ABHA vs Mobile */}
+              {/* Switcher Tab */}
               <div className="flex bg-[#ededf9] p-1.5 rounded-2xl">
                 <button
                   onClick={() => {
@@ -565,13 +547,13 @@ export default function KioskIdentifyPage() {
                     updateActivity()
                   }}
                   className={[
-                    'flex-1 py-3 text-[15px] font-bold rounded-xl transition-all',
+                    'flex-1 py-3 text-[14px] font-bold rounded-xl transition-all',
                     manualType === 'ABHA'
                       ? 'bg-white text-[#004ac6] shadow-sm'
                       : 'text-[#434655] hover:text-[#191b23]',
                   ].join(' ')}
                 >
-                  14-Digit ABHA Number
+                  ABHA (14-Digit)
                 </button>
                 <button
                   onClick={() => {
@@ -581,17 +563,17 @@ export default function KioskIdentifyPage() {
                     updateActivity()
                   }}
                   className={[
-                    'flex-1 py-3 text-[15px] font-bold rounded-xl transition-all',
+                    'flex-1 py-3 text-[14px] font-bold rounded-xl transition-all',
                     manualType === 'MOBILE'
                       ? 'bg-white text-[#004ac6] shadow-sm'
                       : 'text-[#434655] hover:text-[#191b23]',
                   ].join(' ')}
                 >
-                  10-Digit Mobile Number
+                  Mobile (10-Digit)
                 </button>
               </div>
 
-              {/* Formatted Display Box */}
+              {/* Formatted Display */}
               <div className="flex flex-col gap-1.5">
                 <div className="bg-white border-2 border-[#004ac6] rounded-2xl h-16 px-5 flex items-center justify-between shadow-inner">
                   {manualType === 'MOBILE' && (
@@ -613,7 +595,7 @@ export default function KioskIdentifyPage() {
                         updateActivity()
                       }}
                       className="text-[#737686] hover:text-[#191b23] p-1"
-                      aria-label="Clear input"
+                      aria-label={t.identify.keypadClear}
                     >
                       ✕
                     </button>
@@ -636,7 +618,7 @@ export default function KioskIdentifyPage() {
                     className={[
                       'h-14 rounded-2xl text-[20px] font-bold transition-all active:scale-95 shadow-sm select-none',
                       k === 'CLEAR'
-                        ? 'bg-[#ededf9] text-[#434655] text-[14px]'
+                        ? 'bg-[#ededf9] text-[#434655] text-[13px]'
                         : k === 'BACKSPACE'
                         ? 'bg-[#ededf9] text-[#434655] flex items-center justify-center'
                         : 'bg-white text-[#191b23] hover:bg-[#f3f3fe] border border-[#e1e2ed]',
@@ -648,6 +630,8 @@ export default function KioskIdentifyPage() {
                         <line x1="18" y1="9" x2="12" y2="15" />
                         <line x1="12" y1="9" x2="18" y2="15" />
                       </svg>
+                    ) : k === 'CLEAR' ? (
+                      t.identify.keypadClear
                     ) : (
                       k
                     )}
@@ -665,7 +649,7 @@ export default function KioskIdentifyPage() {
                     updateActivity()
                   }}
                 >
-                  Back
+                  {t.common.back}
                 </KioskButton>
 
                 <KioskButton
@@ -679,25 +663,8 @@ export default function KioskIdentifyPage() {
                   }
                   onClick={() => performLookup(inputValue, manualType)}
                 >
-                  Search Records →
+                  {t.identify.keypadSearch}
                 </KioskButton>
-              </div>
-
-              {/* Demo Fill Helper */}
-              <div className="text-center">
-                <button
-                  onClick={() => {
-                    if (manualType === 'ABHA') {
-                      setInputValue('12-3456-7890-1234')
-                    } else {
-                      setInputValue('9876543210')
-                    }
-                    updateActivity()
-                  }}
-                  className="text-[12px] font-semibold text-[#004ac6] hover:underline"
-                >
-                  Fill with Demo {manualType} Number
-                </button>
               </div>
             </motion.div>
           )}
@@ -719,20 +686,17 @@ export default function KioskIdentifyPage() {
               </div>
               <div className="space-y-1">
                 <h2 className="text-[22px] font-bold text-[#191b23]">
-                  Finding your hospital records…
+                  {t.identify.searching}
                 </h2>
-                <p className="text-[16px] text-[#434655]" lang="hi">
-                  कृपया प्रतीक्षा करें
-                </p>
                 <p className="text-[13px] text-[#737686]">
-                  Searching National Health Stack & AIIA OPD Registry
+                  AIIA OPD Registry &amp; ABHA Network
                 </p>
               </div>
             </motion.div>
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              VIEW 5: CONFIRM RETURNING PATIENT (Stitch p_04)
+              VIEW 5: CONFIRM RETURNING PATIENT
           ════════════════════════════════════════════════════════════════════ */}
           {view === 'CONFIRM_RETURNING' && activePatient && (
             <motion.div
@@ -743,22 +707,17 @@ export default function KioskIdentifyPage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-6"
             >
-              {/* Heading */}
               <div className="text-center flex flex-col gap-1">
-                <h1 className="text-[32px] font-bold text-[#191b23] leading-tight">
-                  Is this you?
+                <h1 className="text-[30px] font-bold text-[#191b23] leading-tight">
+                  {t.identify.patientFound}
                 </h1>
-                <p className="text-[22px] text-[#434655] font-normal" lang="hi">
-                  क्या यह आप हैं?
-                </p>
-                <p className="text-[14px] text-[#737686] mt-0.5">
-                  Please verify your details below before proceeding to consultation.
+                <p className="text-[15px] text-[#737686] mt-0.5">
+                  {t.identify.isThisYou}
                 </p>
               </div>
 
-              {/* Patient Profile Card (from Stitch demographic_confirmation_p_04) */}
-              <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.04)] p-6 flex flex-col gap-4 border border-[#e1e2ed]">
-                {/* Top: Avatar & Name */}
+              {/* Profile Card */}
+              <div className="bg-white rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] p-6 flex flex-col gap-4 border border-[#e1e2ed]">
                 <div className="flex items-center gap-4 pb-4 border-b border-[#ededf9]">
                   <div className="w-16 h-16 rounded-2xl bg-[#004ac6]/10 border border-[#004ac6]/20 flex items-center justify-center shrink-0">
                     <svg viewBox="0 0 24 24" className="w-8 h-8 text-[#004ac6]" fill="currentColor">
@@ -778,55 +737,34 @@ export default function KioskIdentifyPage() {
                   </div>
                 </div>
 
-                {/* Detail Key-Value Rows */}
                 <div className="flex flex-col gap-3 pt-1 text-[15px]">
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-[#737686] flex items-center gap-2">
-                      <svg viewBox="0 0 20 20" className="w-4 h-4 text-[#a1a1aa]" fill="none">
-                        <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M3 8h14M8 2v3M12 2v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                      Age
-                    </span>
+                    <span className="text-[#737686]">{t.identify.ageLabel}</span>
                     <span className="font-semibold text-[#191b23]">
-                      {activePatient.age} years
+                      {activePatient.age}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-[#737686] flex items-center gap-2">
-                      <svg viewBox="0 0 20 20" className="w-4 h-4 text-[#a1a1aa]" fill="none">
-                        <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
-                        <path d="M10 7v6M7 10h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                      Sex
-                    </span>
+                    <span className="text-[#737686]">{t.identify.genderLabel}</span>
                     <span className="font-semibold text-[#191b23]">
-                      {activePatient.sex}
+                      {activePatient.sex === 'Male'
+                        ? t.identify.male
+                        : activePatient.sex === 'Female'
+                        ? t.identify.female
+                        : t.identify.other}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center py-1">
-                    <span className="text-[#737686] flex items-center gap-2">
-                      <svg viewBox="0 0 20 20" className="w-4 h-4 text-[#a1a1aa]" fill="none">
-                        <rect x="5" y="2" width="10" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                        <line x1="9" y1="15" x2="11" y2="15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                      Registered Mobile
-                    </span>
+                    <span className="text-[#737686]">{t.identify.phoneLabel}</span>
                     <span className="font-mono font-semibold text-[#191b23]">
                       {activePatient.phone.slice(0, 5)} ●●●●●
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center py-1 border-t border-[#ededf9] pt-3">
-                    <span className="text-[#737686] flex items-center gap-2">
-                      <svg viewBox="0 0 20 20" className="w-4 h-4 text-[#a1a1aa]" fill="none">
-                        <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.5" />
-                        <polyline points="10 6 10 10 13 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                      Last Hospital Visit
-                    </span>
+                    <span className="text-[#737686]">{t.identify.lastVisitLabel}</span>
                     <span className="font-medium text-[#006a61]">
                       {activePatient.lastVisit ?? '12 Aug 2026'}
                     </span>
@@ -834,17 +772,14 @@ export default function KioskIdentifyPage() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Actions */}
               <div className="flex flex-col gap-3 w-full">
                 <KioskButton
                   variant="primary"
                   size="fullLg"
                   onClick={handleProceedToConsent}
                 >
-                  <svg viewBox="0 0 20 20" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M4 10l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Yes, that&apos;s me — continue
+                  {t.identify.yesThisIsMe}
                 </KioskButton>
 
                 <KioskButton
@@ -855,14 +790,14 @@ export default function KioskIdentifyPage() {
                     updateActivity()
                   }}
                 >
-                  This isn&apos;t me — try another number
+                  {t.identify.notMe}
                 </KioskButton>
               </div>
             </motion.div>
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              VIEW 6: NEW PATIENT REGISTRATION FORM (Stitch p_03)
+              VIEW 6: NEW PATIENT REGISTRATION FORM
           ════════════════════════════════════════════════════════════════════ */}
           {view === 'NEW_PATIENT_FORM' && (
             <motion.div
@@ -873,26 +808,20 @@ export default function KioskIdentifyPage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-5"
             >
-              {/* Heading */}
               <div className="text-center">
-                <h1 className="text-[28px] font-bold text-[#191b23]">
-                  A few details to get started
+                <h1 className="text-[26px] font-bold text-[#191b23]">
+                  {t.identify.registerTitle}
                 </h1>
-                <p className="text-[18px] text-[#434655]" lang="hi">
-                  शुरू करने के लिए कुछ जानकारी
-                </p>
                 <p className="text-[13px] text-[#737686] mt-0.5">
-                  Takes less than a minute. Kept strictly confidential.
+                  {t.identify.titleSub}
                 </p>
               </div>
 
-              {/* Form Container */}
               <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
                 {/* Full Name */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[14px] font-bold text-[#191b23] flex justify-between">
-                    <span>Full Name <span className="text-[var(--color-critical)]">*</span></span>
-                    <span className="text-[12px] font-normal text-[#737686]" lang="hi">पूरा नाम</span>
+                  <label className="text-[14px] font-bold text-[#191b23]">
+                    {t.identify.nameLabel} <span className="text-[var(--color-critical)]">*</span>
                   </label>
                   <input
                     type="text"
@@ -901,8 +830,8 @@ export default function KioskIdentifyPage() {
                       setNewName(e.target.value)
                       updateActivity()
                     }}
-                    placeholder="Enter patient's full name"
-                    className="w-full h-14 px-4 bg-white rounded-2xl border-2 border-[#e1e2ed] focus:border-[#004ac6] text-[17px] font-medium text-[#191b23] outline-none transition-all shadow-sm"
+                    placeholder={t.identify.namePlaceholder}
+                    className="w-full h-14 px-4 bg-white rounded-2xl border-2 border-[#e1e2ed] focus:border-[#004ac6] text-[16px] font-medium text-[#191b23] outline-none transition-all shadow-sm"
                   />
                 </div>
 
@@ -910,7 +839,7 @@ export default function KioskIdentifyPage() {
                 <div className="flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <label className="text-[14px] font-bold text-[#191b23]">
-                      Age / Date of Birth <span className="text-[var(--color-critical)]">*</span>
+                      {t.identify.ageLabel} <span className="text-[var(--color-critical)]">*</span>
                     </label>
                     <div className="flex bg-[#ededf9] p-1 rounded-lg text-[12px]">
                       <button
@@ -921,7 +850,7 @@ export default function KioskIdentifyPage() {
                           ageMode === 'AGE' ? 'bg-white text-[#004ac6] shadow-sm' : 'text-[#737686]',
                         ].join(' ')}
                       >
-                        Age
+                        {t.identify.ageModeLabel}
                       </button>
                       <button
                         type="button"
@@ -931,7 +860,7 @@ export default function KioskIdentifyPage() {
                           ageMode === 'DOB' ? 'bg-white text-[#004ac6] shadow-sm' : 'text-[#737686]',
                         ].join(' ')}
                       >
-                        DOB
+                        {t.identify.dobModeLabel}
                       </button>
                     </div>
                   </div>
@@ -944,8 +873,8 @@ export default function KioskIdentifyPage() {
                         setNewAge(e.target.value)
                         updateActivity()
                       }}
-                      placeholder="Age in years (e.g. 45)"
-                      className="w-full h-14 px-4 bg-white rounded-2xl border-2 border-[#e1e2ed] focus:border-[#004ac6] text-[17px] font-medium text-[#191b23] outline-none transition-all shadow-sm font-mono"
+                      placeholder="Age (e.g. 45)"
+                      className="w-full h-14 px-4 bg-white rounded-2xl border-2 border-[#e1e2ed] focus:border-[#004ac6] text-[16px] font-medium text-[#191b23] outline-none transition-all shadow-sm font-mono"
                     />
                   ) : (
                     <input
@@ -955,16 +884,15 @@ export default function KioskIdentifyPage() {
                         setNewDob(e.target.value)
                         updateActivity()
                       }}
-                      className="w-full h-14 px-4 bg-white rounded-2xl border-2 border-[#e1e2ed] focus:border-[#004ac6] text-[17px] font-medium text-[#191b23] outline-none transition-all shadow-sm"
+                      className="w-full h-14 px-4 bg-white rounded-2xl border-2 border-[#e1e2ed] focus:border-[#004ac6] text-[16px] font-medium text-[#191b23] outline-none transition-all shadow-sm"
                     />
                   )}
                 </div>
 
                 {/* Sex Selector */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[14px] font-bold text-[#191b23] flex justify-between">
-                    <span>Sex <span className="text-[var(--color-critical)]">*</span></span>
-                    <span className="text-[12px] font-normal text-[#737686]" lang="hi">लिंग</span>
+                  <label className="text-[14px] font-bold text-[#191b23]">
+                    {t.identify.genderLabel} <span className="text-[var(--color-critical)]">*</span>
                   </label>
                   <div className="grid grid-cols-3 gap-3">
                     {(['Male', 'Female', 'Other'] as const).map((s) => (
@@ -976,13 +904,13 @@ export default function KioskIdentifyPage() {
                           updateActivity()
                         }}
                         className={[
-                          'h-13 py-3 rounded-xl font-bold text-[15px] border-2 transition-all active:scale-98',
+                          'h-13 py-3 rounded-xl font-bold text-[14px] border-2 transition-all active:scale-98',
                           newSex === s
                             ? 'bg-[#004ac6] text-white border-[#004ac6] shadow-md'
                             : 'bg-white text-[#434655] border-[#e1e2ed] hover:bg-[#f3f3fe]',
                         ].join(' ')}
                       >
-                        {s}
+                        {s === 'Male' ? t.identify.male : s === 'Female' ? t.identify.female : t.identify.other}
                       </button>
                     ))}
                   </div>
@@ -990,9 +918,8 @@ export default function KioskIdentifyPage() {
 
                 {/* Mobile Number */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[14px] font-bold text-[#191b23] flex justify-between">
-                    <span>Mobile Number <span className="text-[var(--color-critical)]">*</span></span>
-                    <span className="text-[12px] font-normal text-[#737686]" lang="hi">मोबाइल नंबर</span>
+                  <label className="text-[14px] font-bold text-[#191b23]">
+                    {t.identify.phoneLabel} <span className="text-[var(--color-critical)]">*</span>
                   </label>
                   <div className="flex h-14 bg-white rounded-2xl border-2 border-[#e1e2ed] focus-within:border-[#004ac6] shadow-sm overflow-hidden">
                     <div className="bg-[#ededf9] px-4 flex items-center text-[15px] font-bold text-[#434655] border-r border-[#e1e2ed]">
@@ -1005,20 +932,18 @@ export default function KioskIdentifyPage() {
                         setNewPhone(e.target.value.replace(/\D/g, '').slice(0, 10))
                         updateActivity()
                       }}
-                      placeholder="10-digit mobile"
-                      className="flex-1 px-4 text-[17px] font-mono font-medium text-[#191b23] outline-none"
+                      placeholder={t.identify.phonePlaceholder}
+                      className="flex-1 px-4 text-[16px] font-mono font-medium text-[#191b23] outline-none"
                     />
                   </div>
                 </div>
 
-                {/* Error Banner */}
                 {formError && (
                   <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-[13px] rounded-xl font-medium">
                     {formError}
                   </div>
                 )}
 
-                {/* Submit & Back CTAs */}
                 <div className="flex flex-col gap-2.5 pt-2">
                   <KioskButton
                     type="submit"
@@ -1026,7 +951,7 @@ export default function KioskIdentifyPage() {
                     size="fullLg"
                     isLoading={isSubmitting}
                   >
-                    Create Profile &amp; Continue →
+                    {t.identify.registerButton}
                   </KioskButton>
 
                   <KioskButton
@@ -1038,7 +963,7 @@ export default function KioskIdentifyPage() {
                       updateActivity()
                     }}
                   >
-                    Cancel &amp; Back to Options
+                    ← {t.common.cancel}
                   </KioskButton>
                 </div>
               </form>
@@ -1057,7 +982,6 @@ export default function KioskIdentifyPage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col items-center text-center gap-6"
             >
-              {/* Success Badge */}
               <div className="w-20 h-20 rounded-full bg-[#006a61] text-white flex items-center justify-center shadow-lg">
                 <svg viewBox="0 0 24 24" className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <polyline points="20 6 9 17 4 12" />
@@ -1066,28 +990,29 @@ export default function KioskIdentifyPage() {
 
               <div className="space-y-1">
                 <span className="text-[13px] font-bold text-[#006a61] tracking-wider uppercase">
-                  Hospital Profile Created
+                  {t.identify.newSuccessTitle}
                 </span>
-                <h1 className="text-[28px] font-bold text-[#191b23]">
-                  Welcome, {activePatient.name}
+                <h1 className="text-[26px] font-bold text-[#191b23]">
+                  {activePatient.name}
                 </h1>
                 <p className="text-[14px] text-[#737686]">
-                  Your temporary kiosk record has been generated for today&apos;s consultation.
+                  {t.identify.newSuccessSub}
                 </p>
               </div>
 
-              {/* Summary Card */}
               <div className="w-full bg-white rounded-2xl p-5 border border-[#e1e2ed] shadow-sm flex flex-col gap-2.5 text-left text-[14px]">
                 <div className="flex justify-between">
-                  <span className="text-[#737686]">Name:</span>
+                  <span className="text-[#737686]">{t.identify.nameLabel}:</span>
                   <span className="font-bold text-[#191b23]">{activePatient.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#737686]">Age / Sex:</span>
-                  <span className="font-semibold text-[#191b23]">{activePatient.age} yrs · {activePatient.sex}</span>
+                  <span className="text-[#737686]">{t.identify.ageLabel} / {t.identify.genderLabel}:</span>
+                  <span className="font-semibold text-[#191b23]">
+                    {activePatient.age} · {activePatient.sex === 'Male' ? t.identify.male : activePatient.sex === 'Female' ? t.identify.female : t.identify.other}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#737686]">Mobile:</span>
+                  <span className="text-[#737686]">{t.identify.phoneLabel}:</span>
                   <span className="font-mono font-semibold text-[#191b23]">+91 {activePatient.phone}</span>
                 </div>
               </div>
@@ -1098,7 +1023,7 @@ export default function KioskIdentifyPage() {
                   size="fullLg"
                   onClick={handleProceedToConsent}
                 >
-                  Proceed to Consent &amp; Intake →
+                  {t.common.continue} →
                 </KioskButton>
               </div>
             </motion.div>

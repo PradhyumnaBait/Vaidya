@@ -1,6 +1,6 @@
 'use client'
 /**
- * K-06 — Medical Documents Workflow (Phase 4 + Phase 5 Multilingual)
+ * K-06 — Medical Documents Workflow (Phase 4 + Multilingual)
  *
  * Route: /kiosk/documents
  *
@@ -36,7 +36,7 @@ export default function KioskDocumentsPage() {
   const [selectedType, setSelectedType] = useState<DocType>('PRESCRIPTION')
   const [simulateQualityIssue, setSimulateQualityIssue] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
-  const [processingStageText, setProcessingStageText] = useState('Capturing high-resolution image…')
+  const [processingStageText, setProcessingStageText] = useState(t.documents.procStep1)
   const [currentScanningDoc, setCurrentScanningDoc] = useState<KioskDocument | null>(null)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
 
@@ -67,7 +67,7 @@ export default function KioskDocumentsPage() {
     updateActivity()
     setStage('PROCESSING')
     setProcessingProgress(20)
-    setProcessingStageText('Capturing high-resolution scan…')
+    setProcessingStageText(t.documents.procStep1)
 
     const newDoc: KioskDocument = {
       id: `doc-${Date.now()}`,
@@ -87,11 +87,11 @@ export default function KioskDocumentsPage() {
 
     setTimeout(() => {
       setProcessingProgress(60)
-      setProcessingStageText('Reading text & medical terms…')
+      setProcessingStageText(t.documents.procStep2)
 
       setTimeout(() => {
         setProcessingProgress(100)
-        setProcessingStageText('Extracting medications and clinical entities…')
+        setProcessingStageText(t.documents.procStep3)
 
         setTimeout(() => {
           if (simulateQualityIssue) {
@@ -103,7 +103,7 @@ export default function KioskDocumentsPage() {
         }, 700)
       }, 900)
     }, 900)
-  }, [addDocument, selectedType, simulateQualityIssue, updateActivity])
+  }, [addDocument, selectedType, simulateQualityIssue, t.documents.procStep1, t.documents.procStep2, t.documents.procStep3, updateActivity])
 
   // ── Quality Warning Actions ─────────────────────────────────────────────────
 
@@ -145,7 +145,7 @@ export default function KioskDocumentsPage() {
 
         <AnimatePresence mode="wait">
           {/* ════════════════════════════════════════════════════════════════════
-              STAGE 1: ENTRY SCREEN (I have new docs vs No new docs)
+              STAGE 1: ENTRY SCREEN
           ════════════════════════════════════════════════════════════════════ */}
           {stage === 'ENTRY' && (
             <motion.div
@@ -158,7 +158,7 @@ export default function KioskDocumentsPage() {
             >
               <div className="space-y-1">
                 <span className="text-[13px] font-bold text-[#004ac6] tracking-wider uppercase">
-                  Vaidya Document System
+                  Vaidya Documents
                 </span>
                 <h1 className="text-[28px] font-bold text-[#191b23] leading-tight">
                   {t.documents.title}
@@ -182,10 +182,20 @@ export default function KioskDocumentsPage() {
                   </div>
                   <div>
                     <span className="text-[13px] font-bold text-[#191b23] block">
-                      {isPlayingAudio ? 'Playing instructions…' : 'Hear document scanner instructions'}
+                      {isPlayingAudio ? '🔊' : '▶'} {t.intake.hearQuestion}
                     </span>
                     <span className="text-[11px] text-[#737686]">
-                      {language === 'mr' ? 'मराठीत सूचना ऐका' : language === 'hi' ? 'हिंदी में निर्देश सुनें' : 'Audio guidance in English'}
+                      {language === 'mr'
+                        ? 'मराठीत ऑडिओ सूचना'
+                        : language === 'hi'
+                        ? 'हिंदी में ऑडियो निर्देश'
+                        : language === 'gu'
+                        ? 'ગુજરાતીમાં ઑડિયો સૂચના'
+                        : language === 'bn'
+                        ? 'বাংলায় অডিও নির্দেশিকা'
+                        : language === 'ta'
+                        ? 'தமிழில் ஆடியோ வழிகாட்டல்'
+                        : 'Audio guidance in English'}
                     </span>
                   </div>
                 </div>
@@ -215,9 +225,6 @@ export default function KioskDocumentsPage() {
                       <h2 className="text-[17px] font-bold text-[#191b23]">
                         {t.documents.haveDocs}
                       </h2>
-                      <span className="bg-[#86f2e4]/40 text-[#005049] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-                        Scan
-                      </span>
                     </div>
                     <p className="text-[13px] text-[#737686] mt-1 leading-relaxed">
                       {t.documents.haveDocsDesc}
@@ -261,7 +268,7 @@ export default function KioskDocumentsPage() {
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              STAGE 2: SCANNER VIEWPORT (Stitch p_16)
+              STAGE 2: SCANNER VIEWPORT
           ════════════════════════════════════════════════════════════════════ */}
           {stage === 'SCANNER' && (
             <motion.div
@@ -294,12 +301,12 @@ export default function KioskDocumentsPage() {
                       ].join(' ')}
                     >
                       {tType === 'PRESCRIPTION'
-                        ? 'Prescription'
+                        ? t.documents.filterPrescription
                         : tType === 'LAB_REPORT'
-                        ? 'Lab Report'
+                        ? t.documents.filterLabReport
                         : tType === 'DISCHARGE_SUMMARY'
-                        ? 'Discharge Summary'
-                        : 'Other'}
+                        ? t.documents.filterDischarge
+                        : t.documents.filterOther}
                     </button>
                   ))}
                 </div>
@@ -307,7 +314,6 @@ export default function KioskDocumentsPage() {
 
               {/* Optical Scanner Viewport */}
               <div className="relative w-full h-[320px] bg-[#191b23] rounded-3xl overflow-hidden shadow-xl flex items-center justify-center border-4 border-[#ededf9]">
-                {/* Alignment Brackets */}
                 <div className="absolute inset-5 border-2 border-white/20 rounded-2xl pointer-events-none flex flex-col justify-between p-2">
                   <div className="flex justify-between">
                     <div className="w-8 h-8 border-t-4 border-l-4 border-white -mt-1 -ml-1 rounded-tl-lg" />
@@ -334,7 +340,7 @@ export default function KioskDocumentsPage() {
                     <line x1="8" y1="16" x2="12" y2="16" />
                   </svg>
                   <span className="text-[12px] font-mono tracking-wider uppercase text-white/70">
-                    Align full page flat here
+                    {t.documents.alignGuide}
                   </span>
                 </div>
               </div>
@@ -370,7 +376,7 @@ export default function KioskDocumentsPage() {
                   {t.documents.tapToCapture}
                 </span>
 
-                {/* Developer / Evaluator simulation toggle for Quality Warning */}
+                {/* Simulation toggle */}
                 <label className="flex items-center gap-2 text-[12px] text-[#737686] cursor-pointer pt-1">
                   <input
                     type="checkbox"
@@ -378,7 +384,7 @@ export default function KioskDocumentsPage() {
                     onChange={(e) => setSimulateQualityIssue(e.target.checked)}
                     className="rounded border-[#c3c6d7]"
                   />
-                  <span>Simulate blur / poor lighting for quality retry test</span>
+                  <span>{t.documents.simBlurToggle}</span>
                 </label>
               </div>
 
@@ -394,7 +400,7 @@ export default function KioskDocumentsPage() {
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              STAGE 3: PROCESSING SCREEN (Stitch p_18)
+              STAGE 3: PROCESSING SCREEN
           ════════════════════════════════════════════════════════════════════ */}
           {stage === 'PROCESSING' && (
             <motion.div
@@ -417,7 +423,6 @@ export default function KioskDocumentsPage() {
                   {processingStageText}
                 </p>
 
-                {/* Progress bar */}
                 <div className="w-full h-2 bg-[#ededf9] rounded-full overflow-hidden mt-3">
                   <div
                     className="h-full bg-[#004ac6] transition-all duration-500 rounded-full"
@@ -429,7 +434,7 @@ export default function KioskDocumentsPage() {
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              STAGE 4: QUALITY WARNING SCREEN (Stitch p_17)
+              STAGE 4: QUALITY WARNING SCREEN
           ════════════════════════════════════════════════════════════════════ */}
           {stage === 'QUALITY_WARNING' && (
             <motion.div
@@ -440,7 +445,6 @@ export default function KioskDocumentsPage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-5 text-center"
             >
-              {/* Alert Badge */}
               <div className="w-16 h-16 rounded-full bg-[#ffdbcd] text-[#943700] flex items-center justify-center mx-auto shadow-sm">
                 <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
@@ -450,9 +454,6 @@ export default function KioskDocumentsPage() {
               </div>
 
               <div className="space-y-1">
-                <span className="text-[12px] font-bold text-[#943700] tracking-wider uppercase">
-                  Clarity Check Required
-                </span>
                 <h1 className="text-[26px] font-bold text-[#191b23]">
                   {t.documents.qualityWarningTitle}
                 </h1>
@@ -461,7 +462,6 @@ export default function KioskDocumentsPage() {
                 </p>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex flex-col gap-3 pt-2">
                 <KioskButton
                   variant="primary"
@@ -490,7 +490,7 @@ export default function KioskDocumentsPage() {
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              STAGE 5: REVIEW / MULTI-DOC LIST (Stitch p_19)
+              STAGE 5: REVIEW / MULTI-DOC LIST
           ════════════════════════════════════════════════════════════════════ */}
           {stage === 'REVIEW' && (
             <motion.div
@@ -501,13 +501,12 @@ export default function KioskDocumentsPage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-5"
             >
-              {/* Header */}
               <div className="text-center space-y-1">
                 <h1 className="text-[28px] font-bold text-[#191b23]">
                   {t.documents.yourDocsTitle}
                 </h1>
                 <p className="text-[14px] text-[#737686]">
-                  {documents.length} document{documents.length !== 1 ? 's' : ''} processed successfully.
+                  {documents.length} {t.documents.docCountLabel}
                 </p>
               </div>
 
@@ -597,7 +596,7 @@ export default function KioskDocumentsPage() {
           )}
 
           {/* ════════════════════════════════════════════════════════════════════
-              STAGE 6: PHASE 5 HANDOFF PLACEHOLDER
+              STAGE 6: READY FOR REVIEW
           ════════════════════════════════════════════════════════════════════ */}
           {stage === 'PHASE_5_HANDOFF' && (
             <motion.div
@@ -608,7 +607,6 @@ export default function KioskDocumentsPage() {
               transition={{ duration: 0.25 }}
               className="flex flex-col gap-6 text-center"
             >
-              {/* Badge */}
               <div className="w-16 h-16 rounded-full bg-[#004ac6] text-white flex items-center justify-center mx-auto shadow-md">
                 <svg viewBox="0 0 24 24" className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M9 11l3 3L22 4" />
@@ -618,15 +616,13 @@ export default function KioskDocumentsPage() {
 
               <div className="space-y-1">
                 <span className="text-[13px] font-bold text-[#004ac6] tracking-wider uppercase">
-                  Ready for Final Review
+                  {t.documents.readyReviewTitle}
                 </span>
                 <h1 className="text-[28px] font-bold text-[#191b23]">
-                  Documents &amp; Intake Captured
+                  {t.documents.readyReviewTitle}
                 </h1>
                 <p className="text-[14px] text-[#737686] max-w-[460px] mx-auto">
-                  {documents.length > 0
-                    ? `${documents.length} document(s) and full clinical history are ready for summary generation.`
-                    : 'Clinical symptoms recorded. Proceeding with existing electronic medical records.'}
+                  {t.documents.readyReviewDesc}
                 </p>
               </div>
 
