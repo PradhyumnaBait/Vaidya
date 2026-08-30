@@ -1,0 +1,6 @@
+export { patientService } from './patient.service'
+export { intakeService } from './intake.service'
+export { documentService } from './document.service'
+export { triageService } from './triage.service'
+export { physicianService } from './physician.service'
+export { adminService } from './admin.service'
