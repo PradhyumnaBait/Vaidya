@@ -1,6 +1,6 @@
 import { Globe, ChevronRight, ShieldCheck } from "lucide-react";
-import VaidyaWordmark from "@/components/ui/VaidyaWordmark";
-import ClinicalVisual from "@/components/clinical/ClinicalVisual";
+import VaidyaWordmark from "@/components/VaidyaWordmark";
+import ClinicalVisual from "@/components/ClinicalVisual";
 import { Button } from "@/components/ui";
 import type { Screen } from "@/types";
 
@@ -11,7 +11,7 @@ interface WelcomeProps {
 export default function Welcome({ onNavigate }: WelcomeProps) {
   return (
     <div
-      className="min-h-full flex flex-col"
+      className="min-h-full flex flex-col justify-between"
       style={{ background: "#F6F6F7" }}
     >
       {/* Header */}
@@ -24,9 +24,9 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 flex items-center">
-        <div className="w-full max-w-7xl mx-auto px-6 md:px-10 xl:px-16 py-10 lg:py-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <main className="flex-1 flex items-center py-6">
+        <div className="w-full max-w-7xl mx-auto px-6 md:px-10 xl:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
             {/* Left: Identity + CTAs */}
             <div className="flex flex-col gap-8">
@@ -49,7 +49,7 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
                   variant="primary"
                   size="lg"
                   onClick={() => onNavigate("patient-intake")}
-                  className="w-full sm:w-auto sm:self-start min-h-[52px] px-7 text-[15px] font-medium"
+                  className="w-full sm:w-auto sm:self-start min-h-[52px] px-7 text-[15px] font-medium shadow-sm hover:shadow"
                 >
                   Begin Patient Intake
                   <ChevronRight size={16} />
@@ -73,11 +73,11 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
               <div className="animate-fade-up stagger-3">
                 <button
                   onClick={() => onNavigate("staff-role")}
-                  className="group flex items-center justify-between w-full sm:w-auto sm:inline-flex gap-4 px-5 py-3.5 rounded-lg border border-[#E4E4E7] bg-white hover:border-[#D4D4D8] hover:bg-[#FAFAFA] transition-all duration-150 active:scale-[0.99]"
+                  className="group flex items-center justify-between w-full sm:w-auto sm:inline-flex gap-4 px-5 py-3.5 rounded-lg border border-[#E4E4E7] bg-white hover:border-[#D4D4D8] hover:bg-[#FAFAFA] transition-all duration-150 active:scale-[0.99] cursor-pointer"
                   style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }}
                 >
                   <div className="text-left">
-                    <div className="text-sm font-semibold text-[#18181B]">Staff & Clinical Access</div>
+                    <div className="text-sm font-semibold text-[#18181B]">Staff &amp; Clinical Access</div>
                     <div className="text-xs text-[#71717A] mt-0.5">For doctors, nursing staff, and administrators</div>
                   </div>
                   <ChevronRight
@@ -88,12 +88,11 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
               </div>
             </div>
 
-            {/* Right: Clinical Visual */}
+            {/* Right: Clinical Visual Anchor (Responsive 3D Flow) */}
             <div
-              className="hidden lg:flex items-center justify-center"
-              style={{ minHeight: 480 }}
+              className="flex items-center justify-center min-h-[380px] sm:min-h-[440px] lg:min-h-[480px] w-full"
             >
-              <div className="relative w-full" style={{ maxWidth: 400, height: 480 }}>
+              <div className="relative w-full max-w-[360px] sm:max-w-[400px] h-[440px] sm:h-[480px]">
                 <ClinicalVisual />
               </div>
             </div>
@@ -103,7 +102,7 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
 
       {/* Footer */}
       <footer className="px-6 md:px-10 py-4 animate-fade-up stagger-5">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-[#E4E4E7] pt-4">
           <p className="text-xs text-[#A1A1AA]">
             Secure clinical intake · Physician verified
           </p>

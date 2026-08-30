@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useState } from "react";
 
 const layers = [
@@ -7,7 +8,6 @@ const layers = [
     items: ["Chief complaint captured", "Language: Hindi (auto-detected)", "Voice transcript ready"],
     accent: "#2563EB",
     accentBg: "#EFF6FF",
-    z: 0,
   },
   {
     label: "Document Analysis",
@@ -15,7 +15,6 @@ const layers = [
     items: ["CBC report · 14 Mar 2024", "Prescription · Apollo Hospital", "X-Ray findings processed"],
     accent: "#0D9488",
     accentBg: "#F0FDFA",
-    z: 1,
   },
   {
     label: "Structured Information",
@@ -23,7 +22,6 @@ const layers = [
     items: ["Hb: 9.2 g/dL  [flagged ↓]", "Duration: 3 months, progressive", "Co-morbidity: T2DM (2019)"],
     accent: "#16A34A",
     accentBg: "#F0FDF4",
-    z: 2,
   },
   {
     label: "Physician Review",
@@ -31,7 +29,6 @@ const layers = [
     items: ["AI summary · 3 sources", "Conflict resolved · 1 item", "Ready for consultation"],
     accent: "#2563EB",
     accentBg: "#EFF6FF",
-    z: 3,
   },
 ];
 
@@ -39,13 +36,12 @@ export default function ClinicalVisual() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 150);
-    return () => clearTimeout(t);
+    setMounted(true);
   }, []);
 
   return (
     <div
-      className="relative w-full h-full flex items-center justify-center select-none"
+      className="relative w-full h-full flex items-center justify-center select-none py-6"
       aria-hidden="true"
     >
       {/* Ambient background glow */}
@@ -53,23 +49,24 @@ export default function ClinicalVisual() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 60% 45%, rgba(37,99,235,0.06) 0%, transparent 70%)",
+            "radial-gradient(ellipse 70% 60% at 50% 45%, rgba(37,99,235,0.08) 0%, transparent 70%)",
         }}
       />
 
-      {/* Stack container */}
+      {/* 3D Stack container */}
       <div
         className="relative"
         style={{
-          width: 340,
-          height: 400,
-          perspective: "1100px",
-          perspectiveOrigin: "50% 45%",
+          width: 330,
+          height: 380,
+          perspective: "1000px",
+          perspectiveOrigin: "50% 40%",
+          transformStyle: "preserve-3d",
         }}
       >
         {layers.map((layer, i) => {
-          const yOffset = i * 76;
-          const delay = mounted ? `${i * 80 + 200}ms` : "0ms";
+          const yOffset = i * 78;
+          const delay = `${i * 90 + 100}ms`;
 
           return (
             <div
@@ -80,20 +77,22 @@ export default function ClinicalVisual() {
                 opacity: mounted ? 1 : 0,
                 transform: mounted
                   ? "translateY(0px)"
-                  : "translateY(10px)",
-                transition: `opacity 300ms ease-out ${delay}, transform 300ms ease-out ${delay}`,
+                  : "translateY(16px)",
+                transition: `opacity 400ms ease-out ${delay}, transform 400ms ease-out ${delay}`,
               }}
             >
-              {/* Panel */}
+              {/* 3D Panel Surface */}
               <div
                 style={{
                   background: "#FFFFFF",
                   border: "1px solid #E4E4E7",
-                  borderRadius: 8,
-                  padding: "10px 14px",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-                  transform: `rotateX(${14 - i * 1.5}deg) rotateY(-14deg) translateZ(${i * 6}px)`,
+                  borderRadius: 10,
+                  padding: "12px 16px",
+                  boxShadow:
+                    "0 4px 20px -2px rgba(0,0,0,0.08), 0 2px 6px -1px rgba(0,0,0,0.04)",
+                  transform: `rotateX(${12 - i * 1.5}deg) rotateY(-12deg) translateZ(${i * 8}px)`,
                   transformOrigin: "50% 50%",
+                  transformStyle: "preserve-3d",
                   willChange: "transform",
                 }}
               >
@@ -102,20 +101,21 @@ export default function ClinicalVisual() {
                   <div className="flex items-center gap-2">
                     <div
                       style={{
-                        width: 6,
-                        height: 6,
+                        width: 7,
+                        height: 7,
                         borderRadius: "50%",
                         background: layer.accent,
                         flexShrink: 0,
+                        boxShadow: `0 0 6px ${layer.accent}`,
                       }}
                     />
                     <span
                       style={{
                         fontFamily: "var(--font-sans)",
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: 600,
                         color: "#18181B",
-                        letterSpacing: "0.01em",
+                        letterSpacing: "-0.01em",
                       }}
                     >
                       {layer.label}
@@ -125,8 +125,8 @@ export default function ClinicalVisual() {
                     style={{
                       fontFamily: "var(--font-sans)",
                       fontSize: 10,
-                      color: "#A1A1AA",
-                      fontWeight: 400,
+                      color: "#71717A",
+                      fontWeight: 500,
                     }}
                   >
                     {layer.sublabel}
@@ -142,17 +142,18 @@ export default function ClinicalVisual() {
                     <div key={j} className="flex items-center gap-2">
                       <div
                         style={{
-                          width: 16,
-                          height: 14,
+                          width: 14,
+                          height: 12,
                           background: layer.accentBg,
                           borderRadius: 3,
+                          border: `1px solid ${layer.accent}30`,
                           flexShrink: 0,
                         }}
                       />
                       <span
                         style={{
                           fontFamily: "var(--font-mono)",
-                          fontSize: 10,
+                          fontSize: 11,
                           color: "#3F3F46",
                           fontWeight: 400,
                         }}
@@ -163,35 +164,37 @@ export default function ClinicalVisual() {
                   ))}
                 </div>
 
-                {/* Layer indicator */}
+                {/* Layer indicator dots */}
                 <div
-                  className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5"
-                  style={{ opacity: 0.3 }}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5"
+                  style={{ opacity: 0.4 }}
                 >
                   {layers.map((_, k) => (
                     <div
                       key={k}
                       style={{
                         width: 3,
-                        height: k === i ? 16 : 8,
+                        height: k === i ? 18 : 8,
                         background: k === i ? layer.accent : "#D4D4D8",
                         borderRadius: 2,
+                        transition: "all 200ms",
                       }}
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Connector line */}
+              {/* Connecting vertical guide */}
               {i < layers.length - 1 && (
                 <div
                   className="absolute"
                   style={{
                     left: 28,
-                    bottom: -14,
-                    width: 1,
-                    height: 14,
-                    background: "linear-gradient(to bottom, #E4E4E7, transparent)",
+                    bottom: -16,
+                    width: 2,
+                    height: 16,
+                    background:
+                      "linear-gradient(to bottom, #2563EB40, transparent)",
                   }}
                 />
               )}
@@ -202,19 +205,20 @@ export default function ClinicalVisual() {
 
       {/* Bottom label */}
       <div
-        className="absolute bottom-4 left-0 right-0 flex justify-center"
+        className="absolute bottom-2 left-0 right-0 flex justify-center"
         style={{
           opacity: mounted ? 1 : 0,
           transition: "opacity 400ms ease-out 600ms",
         }}
       >
         <span
+          className="px-3 py-1 rounded-full bg-white border border-[#E4E4E7] shadow-2xs"
           style={{
             fontFamily: "var(--font-sans)",
             fontSize: 10,
-            color: "#A1A1AA",
+            color: "#71717A",
             letterSpacing: "0.06em",
-            fontWeight: 500,
+            fontWeight: 600,
             textTransform: "uppercase",
           }}
         >
