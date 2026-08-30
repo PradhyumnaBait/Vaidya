@@ -25,24 +25,30 @@ const buttonVariants = cva(
   }
 )
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   isLoading?: boolean
+  loading?: boolean
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, isLoading, children, disabled, ...props }, ref) => (
-    <button
-      ref={ref}
-      className={cn(buttonVariants({ variant, size }), className)}
-      disabled={disabled || isLoading}
-      {...props}
-    >
-      {isLoading ? (
-        <svg className="processing-arc h-4 w-4" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="40" strokeDashoffset="15" strokeLinecap="round"/>
-        </svg>
-      ) : children}
-    </button>
-  )
+  ({ className, variant, size, isLoading, loading, children, disabled, ...props }, ref) => {
+    const isSpinning = isLoading || loading
+    return (
+      <button
+        ref={ref}
+        className={cn(buttonVariants({ variant, size }), className)}
+        disabled={disabled || isSpinning}
+        {...props}
+      >
+        {isSpinning ? (
+          <svg className="processing-arc h-4 w-4" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeDasharray="40" strokeDashoffset="15" strokeLinecap="round"/>
+          </svg>
+        ) : (
+          children
+        )}
+      </button>
+    )
+  }
 )
 Button.displayName = 'Button'
