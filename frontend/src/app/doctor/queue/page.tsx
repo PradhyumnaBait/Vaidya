@@ -7,13 +7,12 @@ import {
   Users,
   Clock,
   AlertTriangle,
-  FileText,
   ChevronRight,
   RefreshCw,
-  BadgeCheck,
-  Building2,
   X,
   Stethoscope,
+  CheckCircle2,
+  Activity,
 } from 'lucide-react'
 import { DEMO_ENCOUNTERS, DEMO_PATIENTS } from '@/constants/demo-data'
 import { cn } from '@/lib/utils'
@@ -21,13 +20,23 @@ import { cn } from '@/lib/utils'
 type StatusFilter = 'ALL' | 'READY_FOR_REVIEW' | 'UNDER_PHYSICIAN_REVIEW' | 'PROCESSING_DOCUMENTS' | 'INTERVIEWING'
 type PriorityFilter = 'ALL' | 'URGENT' | 'NORMAL'
 
-const PATIENT_METRICS: Record<string, { complaint: string; priority: 'URGENT' | 'NORMAL' | 'HIGH'; docs: number; waitMin: number; language: string }> = {
+interface PatientMeta {
+  complaint: string
+  priority: 'URGENT' | 'NORMAL'
+  docs: number
+  waitMin: number
+  language: string
+  intakeSummary: string
+}
+
+const PATIENT_METRICS: Record<string, PatientMeta> = {
   'enc-001': {
     complaint: 'Epigastric pain, 3 months duration • Burning sensation',
     priority: 'NORMAL',
     docs: 3,
     waitMin: 14,
     language: 'मराठी',
+    intakeSummary: 'Prepared by VAIDYA',
   },
   'enc-002': {
     complaint: 'Acute chest discomfort, breathlessness radiating to left arm',
@@ -35,6 +44,7 @@ const PATIENT_METRICS: Record<string, { complaint: string; priority: 'URGENT' | 
     docs: 1,
     waitMin: 4,
     language: 'English',
+    intakeSummary: 'Urgent Cardiac Flag',
   },
   'enc-003': {
     complaint: 'Bilateral knee pain, generalized weakness, joint stiffness',
@@ -42,6 +52,7 @@ const PATIENT_METRICS: Record<string, { complaint: string; priority: 'URGENT' | 
     docs: 2,
     waitMin: 32,
     language: 'हिन्दी',
+    intakeSummary: 'Prepared by VAIDYA',
   },
   'enc-004': {
     complaint: 'Chronic indigestion, acid reflux, Ahara dietary irregularity',
@@ -49,6 +60,7 @@ const PATIENT_METRICS: Record<string, { complaint: string; priority: 'URGENT' | 
     docs: 1,
     waitMin: 22,
     language: 'हिन्दी',
+    intakeSummary: 'AYUSH Profile Complete',
   },
   'enc-005': {
     complaint: 'Recurring migraine, visual aura, disturbed sleep pattern',
@@ -56,18 +68,19 @@ const PATIENT_METRICS: Record<string, { complaint: string; priority: 'URGENT' | 
     docs: 0,
     waitMin: 9,
     language: 'Urdu',
+    intakeSummary: 'Kiosk Intake Active',
   },
 }
 
 const STATE_BADGES: Record<string, { label: string; bg: string; text: string; border: string }> = {
   READY_FOR_REVIEW: {
-    label: 'Ready for Review',
+    label: 'Prepared',
     bg: 'bg-[#F0FDF4]',
     text: 'text-[#166534]',
     border: 'border-[#BBF7D0]',
   },
   UNDER_PHYSICIAN_REVIEW: {
-    label: 'Under Review',
+    label: 'In Consultation',
     bg: 'bg-[#EFF6FF]',
     text: 'text-[#1E40AF]',
     border: 'border-[#BFDBFE]',
@@ -79,7 +92,7 @@ const STATE_BADGES: Record<string, { label: string; bg: string; text: string; bo
     border: 'border-[#FDE68A]',
   },
   INTERVIEWING: {
-    label: 'Intake in Progress',
+    label: 'Intake Active',
     bg: 'bg-[#FAF8FF]',
     text: 'text-[#6B21A8]',
     border: 'border-[#E9D5FF]',
@@ -96,7 +109,7 @@ export default function DoctorQueuePage() {
 
   const handleRefresh = () => {
     setIsRefreshing(true)
-    setTimeout(() => setIsRefreshing(false), 500)
+    setTimeout(() => setIsRefreshing(false), 400)
   }
 
   const filteredEncounters = useMemo(() => {
@@ -104,7 +117,6 @@ export default function DoctorQueuePage() {
       const patient = enc.patient || DEMO_PATIENTS.find((p) => p.id === enc.patientId)
       const meta = PATIENT_METRICS[enc.id] || { complaint: '', priority: 'NORMAL' }
 
-      // Search matching name, token, or ABHA
       const matchesSearch =
         searchQuery === '' ||
         patient?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -112,10 +124,8 @@ export default function DoctorQueuePage() {
         patient?.abhaNumber?.includes(searchQuery) ||
         meta.complaint.toLowerCase().includes(searchQuery.toLowerCase())
 
-      // Status matching
       const matchesStatus = statusFilter === 'ALL' || enc.state === statusFilter
 
-      // Priority matching
       const matchesPriority =
         priorityFilter === 'ALL' ||
         (priorityFilter === 'URGENT' && meta.priority === 'URGENT') ||
@@ -125,64 +135,69 @@ export default function DoctorQueuePage() {
     })
   }, [searchQuery, statusFilter, priorityFilter])
 
-  const counts = useMemo(() => {
-    return {
-      total: DEMO_ENCOUNTERS.length,
-      ready: DEMO_ENCOUNTERS.filter((e) => e.state === 'READY_FOR_REVIEW').length,
-      urgent: Object.values(PATIENT_METRICS).filter((m) => m.priority === 'URGENT').length,
-      avgWait: '16m',
-    }
-  }, [])
-
   return (
     <div className="flex-1 flex flex-col h-full bg-[#FAF8FF] overflow-y-auto">
-      {/* ─── Top Control Bar ────────────────────────────────────────── */}
-      <div className="bg-white border-b border-[#E1E2ED] px-6 py-5 shrink-0 shadow-xs">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      {/* ─── 1. TOP HEADER & COMPACT KPIS ───────────────────────────── */}
+      <div className="bg-white border-b border-[#E1E2ED] px-6 md:px-8 py-5 shrink-0 shadow-xs">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#EFF6FF] text-[#1E40AF] text-[11px] font-bold uppercase tracking-wider border border-[#BFDBFE]">
-                <Stethoscope size={13} className="text-[#2563EB]" />
-                All India Institute of Ayurveda • OPD Console
+                <Stethoscope size={13} className="text-[#004AC6]" />
+                VAIDYA Clinical Intelligence • OPD Command
               </span>
             </div>
             <h1 className="text-[26px] font-bold text-[#18181B] tracking-tight">
-              Patient Queue
+              Today&apos;s OPD
             </h1>
             <p className="text-[13px] text-[#71717A]">
-              Real-time intake stream prepared by VAIDYA Kiosk for physician review.
+              Review prepared patient cases before consultation.
             </p>
           </div>
 
-          {/* Quick Metrics Chips */}
+          {/* 4 Compact KPI Metrics (Order: Waiting -> In Consultation -> Priority -> Completed) */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-[#FAF8FF] border border-[#E1E2ED] px-4 py-2 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#004AC6]/10 text-[#004AC6] flex items-center justify-center font-bold text-sm">
+            {/* 1. Waiting */}
+            <div className="bg-[#FAF8FF] border border-[#E1E2ED] px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#004AC6]/10 text-[#004AC6] flex items-center justify-center font-bold text-sm">
                 <Users size={16} />
               </div>
               <div>
-                <p className="text-[11px] text-[#71717A] uppercase font-bold tracking-wider">Queue Total</p>
-                <p className="text-[18px] font-bold text-[#18181B] leading-none">{counts.total}</p>
+                <p className="text-[10px] text-[#71717A] uppercase font-bold tracking-wider">Waiting</p>
+                <p className="text-[17px] font-extrabold text-[#18181B] leading-none">05</p>
               </div>
             </div>
 
-            <div className="bg-[#F0FDF4] border border-[#BBF7D0] px-4 py-2 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#16A34A]/10 text-[#16A34A] flex items-center justify-center font-bold text-sm">
-                <BadgeCheck size={16} />
+            {/* 2. In Consultation */}
+            <div className="bg-[#EFF6FF] border border-[#BFDBFE] px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#004AC6] text-white flex items-center justify-center font-bold text-sm">
+                <Activity size={16} />
               </div>
               <div>
-                <p className="text-[11px] text-[#166534] uppercase font-bold tracking-wider">Ready for Review</p>
-                <p className="text-[18px] font-bold text-[#166534] leading-none">{counts.ready}</p>
+                <p className="text-[10px] text-[#1E40AF] uppercase font-bold tracking-wider">In Consultation</p>
+                <p className="text-[17px] font-extrabold text-[#1E40AF] leading-none">01</p>
               </div>
             </div>
 
-            <div className="bg-[#FEF2F2] border border-[#FECACA] px-4 py-2 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#DC2626]/10 text-[#DC2626] flex items-center justify-center font-bold text-sm">
+            {/* 3. Priority */}
+            <div className="bg-[#FEF2F2] border border-[#FECACA] px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#DC2626]/10 text-[#DC2626] flex items-center justify-center font-bold text-sm">
                 <AlertTriangle size={16} />
               </div>
               <div>
-                <p className="text-[11px] text-[#991B1B] uppercase font-bold tracking-wider">Urgent Triage</p>
-                <p className="text-[18px] font-bold text-[#991B1B] leading-none">{counts.urgent}</p>
+                <p className="text-[10px] text-[#991B1B] uppercase font-bold tracking-wider">Priority</p>
+                <p className="text-[17px] font-extrabold text-[#991B1B] leading-none">01</p>
+              </div>
+            </div>
+
+            {/* 4. Completed */}
+            <div className="bg-[#F0FDF4] border border-[#BBF7D0] px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#16A34A]/10 text-[#16A34A] flex items-center justify-center font-bold text-sm">
+                <CheckCircle2 size={16} />
+              </div>
+              <div>
+                <p className="text-[10px] text-[#166534] uppercase font-bold tracking-wider">Completed</p>
+                <p className="text-[17px] font-extrabold text-[#166534] leading-none">24</p>
               </div>
             </div>
 
@@ -192,17 +207,16 @@ export default function DoctorQueuePage() {
                 'p-2.5 rounded-xl border border-[#E1E2ED] bg-white text-[#52525B] hover:text-[#18181B] hover:bg-[#F4F4F5] transition-all shadow-xs active:scale-95',
                 isRefreshing && 'animate-spin'
               )}
-              title="Refresh Queue"
-              aria-label="Refresh Queue"
+              title="Refresh OPD Stream"
             >
-              <RefreshCw size={18} />
+              <RefreshCw size={17} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* ─── Main Queue Workspace ──────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto p-6 w-full flex-1 flex flex-col gap-6">
+      {/* ─── 2. MAIN PATIENT QUEUE (The Main Object) ──────────────────── */}
+      <div className="max-w-7xl mx-auto p-6 md:p-8 w-full flex-1 flex flex-col gap-5">
         {/* Search & Filter Ribbon */}
         <div className="bg-white rounded-2xl p-4 border border-[#E1E2ED] shadow-xs flex flex-col md:flex-row items-center justify-between gap-3">
           {/* Search Input */}
@@ -210,7 +224,7 @@ export default function DoctorQueuePage() {
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1AA]" />
             <input
               type="text"
-              placeholder="Search by patient name, Token, ABHA ID..."
+              placeholder="Search by patient name, Token (e.g. A-028), ABHA..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-10 pl-9 pr-8 text-[13px] bg-[#FAF8FF] border border-[#E1E2ED] rounded-xl text-[#18181B] placeholder:text-[#A1A1AA] focus:outline-none focus:border-[#004AC6] focus:bg-white transition-all"
@@ -225,7 +239,7 @@ export default function DoctorQueuePage() {
             )}
           </div>
 
-          {/* Filter Pills */}
+          {/* Filter Tabs */}
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
             <div className="flex items-center gap-1 bg-[#FAF8FF] p-1 rounded-xl border border-[#E1E2ED]">
               <button
@@ -237,7 +251,7 @@ export default function DoctorQueuePage() {
                     : 'text-[#71717A] hover:text-[#18181B]'
                 )}
               >
-                All
+                All Patients
               </button>
               <button
                 onClick={() => setStatusFilter('READY_FOR_REVIEW')}
@@ -248,7 +262,7 @@ export default function DoctorQueuePage() {
                     : 'text-[#71717A] hover:text-[#18181B]'
                 )}
               >
-                Ready
+                Prepared
               </button>
               <button
                 onClick={() => setStatusFilter('UNDER_PHYSICIAN_REVIEW')}
@@ -273,19 +287,21 @@ export default function DoctorQueuePage() {
               )}
             >
               <AlertTriangle size={13} />
-              <span>Urgent Only</span>
+              <span>Priority Only</span>
             </button>
           </div>
         </div>
 
-        {/* Patient Queue Table / Cards */}
+        {/* Patient Rows with Clear Column Hierarchy */}
         <div className="space-y-3">
           {filteredEncounters.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-[#E1E2ED] p-12 text-center">
-              <Users size={32} className="mx-auto text-[#A1A1AA] mb-3" />
-              <h3 className="text-[16px] font-bold text-[#18181B]">No patients found</h3>
-              <p className="text-[13px] text-[#71717A] mt-1">
-                No cases match the active search or filter criteria.
+            <div className="bg-white rounded-3xl p-10 border border-[#E1E2ED] text-center space-y-3 shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-[#FAF8FF] text-[#71717A] flex items-center justify-center mx-auto border border-[#E1E2ED]">
+                <Search size={22} />
+              </div>
+              <h3 className="text-[16px] font-bold text-[#18181B]">No patient cases found</h3>
+              <p className="text-[13px] text-[#71717A] max-w-sm mx-auto">
+                No matching patients for &quot;{searchQuery}&quot;. Try adjusting your search query or filter criteria.
               </p>
               <button
                 onClick={() => {
@@ -293,20 +309,21 @@ export default function DoctorQueuePage() {
                   setStatusFilter('ALL')
                   setPriorityFilter('ALL')
                 }}
-                className="mt-4 px-4 py-2 text-[13px] font-semibold text-[#004AC6] bg-[#EFF6FF] rounded-xl hover:bg-[#DBEAFE] transition-colors"
+                className="px-4 py-2 rounded-xl bg-[#FAF8FF] border border-[#E1E2ED] text-[#004AC6] text-[12px] font-bold hover:bg-[#EFF6FF] transition-all"
               >
-                Reset Filters
+                Clear all filters
               </button>
             </div>
           ) : (
             filteredEncounters.map((enc) => {
               const patient = enc.patient || DEMO_PATIENTS.find((p) => p.id === enc.patientId)
               const meta = PATIENT_METRICS[enc.id] || {
-                complaint: 'Clinical intake pending',
+                complaint: 'Clinical intake in progress',
                 priority: 'NORMAL',
                 docs: 0,
                 waitMin: 10,
                 language: 'English',
+                intakeSummary: 'Standard OPD intake',
               }
               const badge = STATE_BADGES[enc.state] || STATE_BADGES.READY_FOR_REVIEW
               const isSelected = selectedEncounterId === enc.id
@@ -316,77 +333,56 @@ export default function DoctorQueuePage() {
                   key={enc.id}
                   onClick={() => setSelectedEncounterId(enc.id)}
                   className={cn(
-                    'bg-white rounded-2xl p-5 border transition-all duration-150 flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer hover:shadow-md active:scale-[0.995]',
+                    'bg-white rounded-2xl p-5 border transition-all duration-150 flex flex-col lg:flex-row lg:items-center justify-between gap-5 cursor-pointer hover:shadow-md active:scale-[0.995]',
                     isSelected
                       ? 'border-[#004AC6] ring-2 ring-[#004AC6]/10 shadow-sm'
                       : 'border-[#E1E2ED] hover:border-[#C3C6D7]'
                   )}
                 >
-                  {/* Left Column: Token + Patient Identity */}
-                  <div className="flex items-start gap-4 min-w-[280px]">
-                    {/* Big Token Badge */}
-                    <div className="w-14 h-14 rounded-2xl bg-[#004AC6]/10 border border-[#004AC6]/20 text-[#004AC6] flex flex-col items-center justify-center shrink-0">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#004AC6]">OPD</span>
-                      <span className="text-[17px] font-extrabold font-mono leading-none">{enc.tokenNumber}</span>
+                  {/* Column 1: Priority Indicator + Token */}
+                  <div className="flex items-center gap-3.5 shrink-0">
+                    <div className="w-12 h-12 rounded-2xl bg-[#004AC6]/10 border border-[#004AC6]/20 text-[#004AC6] flex flex-col items-center justify-center shrink-0">
+                      <span className="text-[8px] font-bold uppercase">OPD</span>
+                      <span className="text-[16px] font-extrabold font-mono leading-none">{enc.tokenNumber}</span>
                     </div>
 
-                    <div className="space-y-1">
+                    <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-[17px] font-bold text-[#18181B]">
                           {patient?.name}
                         </h3>
                         {meta.priority === 'URGENT' && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] text-[10px] font-bold uppercase tracking-wider animate-pulse">
-                            <AlertTriangle size={10} />
-                            Urgent
+                          <span className="px-2 py-0.5 rounded-full bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA] text-[10px] font-bold uppercase tracking-wider animate-pulse">
+                            Priority
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-[12px] text-[#71717A]">
-                        <span>{patient?.age} yrs • {patient?.sex === 'M' || patient?.sex === 'male' ? 'Male' : 'Female'}</span>
-                        <span>•</span>
-                        <span className="bg-[#FAF8FF] px-2 py-0.5 rounded border border-[#E1E2ED] font-medium text-[#434655]">
-                          {meta.language}
-                        </span>
-                        {patient?.abhaNumber && (
-                          <>
-                            <span>•</span>
-                            <span className="font-mono text-[11px] text-[#004AC6]">
-                              ABHA: {patient.abhaNumber}
-                            </span>
-                          </>
-                        )}
-                      </div>
+                      <p className="text-[12px] text-[#71717A]">
+                        {patient?.age}M • {patient?.sex === 'M' || patient?.sex === 'male' ? 'Male' : 'Female'} • {meta.language}
+                        {patient?.abhaNumber && <span className="font-mono text-[#004AC6] ml-2">ABHA Linked</span>}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Middle Column: Chief Complaint & Documents */}
+                  {/* Column 2: Chief Complaint & Documents */}
                   <div className="flex-1 lg:px-4 space-y-1">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">
-                      Chief Complaint &amp; Intake
+                      Chief Complaint
                     </p>
-                    <p className="text-[14px] text-[#18181B] font-medium leading-snug line-clamp-2">
+                    <p className="text-[14px] text-[#18181B] font-semibold leading-snug line-clamp-1">
                       {meta.complaint}
                     </p>
-                    <div className="flex items-center gap-3 pt-1 text-[12px] text-[#71717A]">
-                      <span className="flex items-center gap-1">
-                        <FileText size={13} className="text-[#004AC6]" />
-                        <span>{meta.docs} {meta.docs === 1 ? 'doc' : 'docs'} attached</span>
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1 text-[#006A61] font-medium">
-                        <Building2 size={13} />
-                        <span>{enc.department}</span>
-                      </span>
-                    </div>
+                    <p className="text-[12px] text-[#71717A]">
+                      {meta.docs} documents attached • {meta.intakeSummary}
+                    </p>
                   </div>
 
-                  {/* Right Column: Status + Action */}
-                  <div className="flex items-center justify-between lg:justify-end gap-4 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#F4F4F5]">
+                  {/* Column 3: Wait Time + Status + Review Case Action */}
+                  <div className="flex items-center justify-between lg:justify-end gap-5 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#F4F4F5]">
                     <div className="text-left lg:text-right space-y-1">
                       <span
                         className={cn(
-                          'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border',
+                          'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
                           badge.bg,
                           badge.text,
                           badge.border
@@ -397,7 +393,7 @@ export default function DoctorQueuePage() {
                       </span>
                       <div className="flex items-center lg:justify-end gap-1 text-[11px] text-[#71717A]">
                         <Clock size={11} />
-                        <span>Waiting {meta.waitMin}m</span>
+                        <span>{meta.waitMin}m wait</span>
                       </div>
                     </div>
 
@@ -406,7 +402,7 @@ export default function DoctorQueuePage() {
                         e.stopPropagation()
                         router.push(`/doctor/encounter/${enc.id}`)
                       }}
-                      className="px-4 py-2.5 rounded-xl bg-[#004AC6] text-white text-[13px] font-bold hover:bg-[#003EA8] transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                      className="px-4 py-2.5 rounded-xl bg-[#004AC6] text-white text-[13px] font-bold hover:bg-[#003EA8] transition-all flex items-center gap-1.5 shadow-xs active:scale-95"
                     >
                       <span>Review Case</span>
                       <ChevronRight size={15} />

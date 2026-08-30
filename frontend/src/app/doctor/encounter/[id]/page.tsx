@@ -6,14 +6,17 @@ import {
   ArrowLeft,
   Sparkles,
   CheckCircle2,
-  FileText,
   ShieldCheck,
   Stethoscope,
   ChevronRight,
-  AlertTriangle,
   Edit3,
   Search,
   ExternalLink,
+  Printer,
+  FileCheck2,
+  RotateCcw,
+  Heart,
+  X,
 } from 'lucide-react'
 import {
   DEMO_ENCOUNTERS,
@@ -47,18 +50,16 @@ export default function DoctorEncounterPage() {
   const [facts, setFacts] = useState<ClinicalFact[]>([])
   const [conflicts, setConflicts] = useState<ClinicalConflict[]>([])
   const [consultationStatus, setConsultationStatus] = useState<'READY' | 'IN_PROGRESS' | 'COMPLETED'>('READY')
-  const [physicianNotes, setPhysicianNotes] = useState('')
-  const [isVerified, setIsVerified] = useState(false)
-  const [verifiedFacts, setVerifiedFacts] = useState<Record<string, boolean>>({})
+  const [physicianNotes, setPhysicianNotes] = useState('Abdomen soft, non-tender on palpation. Mild epigastric tenderness. Diagnosis: Chronic Acid Peptic Disease / Dyspepsia. Advised dietary modifications (avoid spicy food) and prescribed Pantoprazole.')
+  const [isIntakeVerified, setIsIntakeVerified] = useState(false)
+  const [prescriptionModalOpen, setPrescriptionModalOpen] = useState(false)
 
   useEffect(() => {
-    // Load encounter & patient
     const foundEnc = DEMO_ENCOUNTERS.find((e) => e.id === encounterId) || DEMO_ENCOUNTERS[0]
     setEncounter(foundEnc)
     const foundPat = foundEnc.patient || DEMO_PATIENTS.find((p) => p.id === foundEnc.patientId) || DEMO_PATIENTS[0]
     setPatient(foundPat)
 
-    // Load clinical facts & conflicts
     if (encounterId === 'enc-001' || !params?.id) {
       setFacts(DEMO_FACTS_ENC001)
       setConflicts(DEMO_CONFLICTS_ENC001)
@@ -72,20 +73,11 @@ export default function DoctorEncounterPage() {
     resolution: 'RESOLVED_A' | 'RESOLVED_B' | 'RESOLVED_UNCERTAIN',
     note?: string
   ) => {
-    await new Promise((r) => setTimeout(r, 400))
+    await new Promise((r) => setTimeout(r, 300))
     addToast({
       type: 'success',
-      title: 'Conflict Decision Recorded',
-      body: `Resolution: ${resolution}${note ? ` • Note: "${note}"` : ''}`,
-    })
-  }
-
-  const handleToggleFactVerification = (factId: string) => {
-    setVerifiedFacts((prev) => ({ ...prev, [factId]: !prev[factId] }))
-    addToast({
-      type: 'info',
-      title: verifiedFacts[factId] ? 'Fact Unmarked' : 'Fact Verified by Physician',
-      body: `Fact #${factId.slice(-3)} updated in clinical brief.`,
+      title: 'Clinical Conflict Decision Saved',
+      body: `Decision: ${resolution}${note ? ` • Note: "${note}"` : ''}`,
     })
   }
 
@@ -94,82 +86,84 @@ export default function DoctorEncounterPage() {
     addToast({
       type: 'info',
       title: 'Consultation In Progress',
-      body: `Started examination for ${patient?.name} (Token ${encounter?.tokenNumber}).`,
+      body: `Reviewing ${patient?.name} (Token ${encounter?.tokenNumber}).`,
     })
   }
 
   const handleCompleteEncounter = () => {
     setConsultationStatus('COMPLETED')
-    setIsVerified(true)
+    setIsIntakeVerified(true)
     addToast({
       type: 'success',
-      title: 'Encounter Finalized',
-      body: `Clinical summary & prescription recorded. Syncing to OPD queue.`,
+      title: 'Consultation Finalized & EHR Synced',
+      body: `Prescription issued for ${patient?.name}. Records synced to ABDM Health Locker.`,
+    })
+  }
+
+  const handleResetDemo = () => {
+    setConsultationStatus('READY')
+    setIsIntakeVerified(false)
+    addToast({
+      type: 'info',
+      title: 'Demo State Reset',
+      body: 'Encounter reset to initial state ready for presentation.',
     })
   }
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#FAF8FF] overflow-y-auto">
-      {/* ─── Top Patient Header ────────────────────────────────────────── */}
+      {/* ─── 1. TOP: Patient Identity Header Bar ────────────────────────────── */}
       <header className="bg-white border-b border-[#E1E2ED] px-6 py-4 sticky top-0 z-20 shadow-xs">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3.5">
             <button
               onClick={() => router.push('/doctor/queue')}
               className="p-2 rounded-xl border border-[#E1E2ED] bg-white text-[#52525B] hover:text-[#18181B] hover:bg-[#F4F4F5] transition-all"
-              title="Back to Patient Queue"
+              title="Back to Today's OPD"
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={16} />
             </button>
 
             {/* Token Badge */}
-            <div className="w-12 h-12 rounded-xl bg-[#004AC6]/10 border border-[#004AC6]/20 text-[#004AC6] flex flex-col items-center justify-center shrink-0">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-[#004AC6]">OPD</span>
-              <span className="text-[15px] font-extrabold font-mono leading-none">{encounter?.tokenNumber || 'A-028'}</span>
+            <div className="w-12 h-12 rounded-2xl bg-[#004AC6]/10 border border-[#004AC6]/20 text-[#004AC6] flex flex-col items-center justify-center shrink-0">
+              <span className="text-[8px] font-bold uppercase text-[#004AC6]">OPD</span>
+              <span className="text-[16px] font-extrabold font-mono leading-none">{encounter?.tokenNumber || 'A-028'}</span>
             </div>
 
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-[20px] font-bold text-[#18181B]">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-[20px] font-bold text-[#18181B] tracking-tight">
                   {patient?.name || 'Dhananjay Patil'}
                 </h1>
-                <span className="bg-[#FAF8FF] text-[#434655] px-2.5 py-0.5 rounded-full text-[12px] font-semibold border border-[#E1E2ED]">
-                  {patient?.age || 67} yrs • {patient?.sex === 'M' || patient?.sex === 'male' ? 'Male' : 'Female'}
+                <span className="text-[12px] font-semibold text-[#52525B] bg-[#FAF8FF] px-2.5 py-0.5 rounded-full border border-[#E1E2ED]">
+                  {patient?.age || 67}M • Male
                 </span>
-                {patient?.preferredLanguage && (
-                  <span className="bg-[#EFF6FF] text-[#004AC6] px-2 py-0.5 rounded-md text-[11px] font-bold uppercase">
-                    Lang: {patient.preferredLanguage === 'mr' ? 'मराठी' : patient.preferredLanguage}
-                  </span>
-                )}
+                <span className="text-[11px] font-bold text-[#166534] bg-[#F0FDF4] border border-[#BBF7D0] px-2.5 py-0.5 rounded-md">
+                  ABHA Linked (12-3456-7890-1234)
+                </span>
               </div>
-              <p className="text-[12px] text-[#71717A] mt-0.5 font-mono">
-                ABHA: {patient?.abhaNumber || '12-3456-7890-1234'} • Encounter ID: #{encounterId}
+              <p className="text-[11px] text-[#71717A] mt-0.5">
+                Preferred Language: Marathi (मराठी) • Kiosk Session: Station 01 • Attending: Dr. Sunita Rao
               </p>
             </div>
           </div>
 
-          {/* Quick Header Actions */}
-          <div className="flex items-center gap-3">
-            <span
-              className={cn(
-                'px-3 py-1 rounded-full text-[12px] font-bold border flex items-center gap-1.5',
-                consultationStatus === 'READY' && 'bg-[#F0FDF4] text-[#166534] border-[#BBF7D0]',
-                consultationStatus === 'IN_PROGRESS' && 'bg-[#EFF6FF] text-[#1E40AF] border-[#BFDBFE] animate-pulse',
-                consultationStatus === 'COMPLETED' && 'bg-[#FAF8FF] text-[#006A61] border-[#86F2E4]'
-              )}
-            >
-              <span className="w-2 h-2 rounded-full bg-current" />
-              {consultationStatus === 'READY' && 'Ready for Review'}
-              {consultationStatus === 'IN_PROGRESS' && 'Consultation Active'}
-              {consultationStatus === 'COMPLETED' && 'Physician Approved'}
-            </span>
+          {/* Right Header Status & Action */}
+          <div className="flex items-center gap-3 self-start md:self-auto">
+            <div className="text-right hidden sm:block">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#F0FDF4] text-[#166534] border border-[#BBF7D0]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-pulse" />
+                Prepared by VAIDYA
+              </span>
+              <p className="text-[10px] text-[#71717A] mt-0.5">Last updated 10:32 AM</p>
+            </div>
 
             {consultationStatus === 'READY' && (
               <button
                 onClick={handleStartConsultation}
                 className="px-4 py-2 rounded-xl bg-[#004AC6] text-white text-[13px] font-bold hover:bg-[#003EA8] transition-all shadow-xs flex items-center gap-1.5 active:scale-95"
               >
-                <Stethoscope size={15} />
+                <Stethoscope size={14} />
                 <span>Start Consultation</span>
               </button>
             )}
@@ -179,346 +173,513 @@ export default function DoctorEncounterPage() {
                 onClick={handleCompleteEncounter}
                 className="px-4 py-2 rounded-xl bg-[#16A34A] text-white text-[13px] font-bold hover:bg-[#15803D] transition-all shadow-xs flex items-center gap-1.5 active:scale-95"
               >
-                <CheckCircle2 size={15} />
-                <span>Sign &amp; Complete</span>
+                <CheckCircle2 size={14} />
+                <span>Finalize Consultation</span>
               </button>
+            )}
+
+            {consultationStatus === 'COMPLETED' && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPrescriptionModalOpen(true)}
+                  className="px-3.5 py-2 rounded-xl bg-[#004AC6] text-white text-[12px] font-bold hover:bg-[#003EA8] transition-all shadow-xs flex items-center gap-1.5 active:scale-95"
+                >
+                  <Printer size={13} />
+                  <span>View Prescription</span>
+                </button>
+                <button
+                  onClick={handleResetDemo}
+                  className="p-2 rounded-xl border border-[#E1E2ED] text-[#71717A] hover:text-[#18181B] bg-white transition-colors"
+                  title="Reset Demo State"
+                >
+                  <RotateCcw size={14} />
+                </button>
+              </div>
             )}
           </div>
         </div>
       </header>
 
-      {/* ─── Main 2-Column Clinical Review Layout ───────────────────── */}
-      <main className="max-w-7xl mx-auto p-6 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* ─── LEFT COLUMN (8 cols): Clinical Intelligence Synthesis ─── */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* Red Flag Alert (If applicable) */}
-          {encounterId === 'enc-002' ? (
-            <RedFlagBanner alert={DEMO_RED_FLAG_ENC002} />
-          ) : (
-            <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl px-5 py-3 flex items-center gap-3">
-              <ShieldCheck size={18} className="text-[#16A34A] shrink-0" />
-              <p className="text-[13px] font-medium text-[#166534]">
-                <span className="font-bold">No urgent red flags</span> detected during patient intake.
-              </p>
-            </div>
-          )}
-
-          {/* AI-Assisted Clinical Summary Box */}
-          <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs">
-            {/* Header Banner */}
-            <div className="flex items-center justify-between pb-4 mb-5 border-b border-[#E1E2ED]">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#004AC6]/10 text-[#004AC6] flex items-center justify-center">
-                  <Sparkles size={18} />
+      {/* ─── Main Content Container ────────────────────────────────────── */}
+      <main className="max-w-7xl mx-auto p-6 md:p-8 w-full flex-1 space-y-8">
+        {/* COMPLETED SUCCESS BANNER & CONSULTATION RESULT (Sections 5 & 6) */}
+        {consultationStatus === 'COMPLETED' && (
+          <section className="bg-white border-2 border-[#16A34A] rounded-3xl p-6 sm:p-8 shadow-md space-y-5 animate-fade-in">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E1E2ED]">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-[#F0FDF4] border border-[#BBF7D0] text-[#16A34A] flex items-center justify-center">
+                  <FileCheck2 size={24} />
                 </div>
                 <div>
-                  <h2 className="text-[16px] font-bold text-[#18181B] flex items-center gap-2">
-                    <span>AI-Assisted Clinical Summary</span>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#004AC6] bg-[#EFF6FF] px-2 py-0.5 rounded-md border border-[#BFDBFE]">
-                      Prepared for Review
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-[19px] font-bold text-[#18181B]">
+                      Consultation Finalized &amp; Prescription Ready
+                    </h2>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[#F0FDF4] text-[#166534] px-2.5 py-0.5 rounded-full border border-[#BBF7D0]">
+                      EHR Synced
                     </span>
-                  </h2>
-                  <p className="text-[12px] text-[#71717A]">
-                    Synthesized from patient kiosk voice intake, touch inputs, and scanned physical records.
+                  </div>
+                  <p className="text-[12px] text-[#52525B] mt-0.5">
+                    Attending: Dr. Sunita Rao • Date: Today, 10:45 AM • Token: A-028 • ABHA: 12-3456-7890-1234
                   </p>
                 </div>
               </div>
 
-              <span className="text-[11px] font-mono text-[#A1A1AA] hidden sm:block">
-                Physician review required
-              </span>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  onClick={() => setPrescriptionModalOpen(true)}
+                  className="px-4 py-2.5 rounded-xl bg-[#004AC6] text-white text-[13px] font-bold hover:bg-[#003EA8] transition-all shadow-xs flex items-center gap-1.5 active:scale-95"
+                >
+                  <Printer size={14} />
+                  <span>View / Print Prescription</span>
+                </button>
+
+                <button
+                  onClick={() => router.push('/patient/dashboard')}
+                  className="px-4 py-2.5 rounded-xl bg-[#F0FDF4] border border-[#BBF7D0] text-[#166534] text-[13px] font-bold hover:bg-[#DCFCE7] transition-all flex items-center gap-1.5 active:scale-95"
+                >
+                  <Heart size={14} />
+                  <span>Open Patient Portal View →</span>
+                </button>
+
+                <button
+                  onClick={() => router.push('/doctor/queue')}
+                  className="px-4 py-2.5 rounded-xl border border-[#E1E2ED] text-[#52525B] hover:text-[#18181B] bg-white text-[13px] font-bold hover:bg-[#FAF8FF] transition-all"
+                >
+                  Return to Queue
+                </button>
+              </div>
             </div>
 
-            {/* Structured Summary Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Chief Complaint */}
-              <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED]">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">
+            {/* Structured Prescription Summary Card */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED] space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                  Active Prescriptions (2)
+                </span>
+                <p className="text-[14px] font-bold text-[#18181B]">
+                  1. Tab. Pantoprazole 40mg (OD × 14d)
+                </p>
+                <p className="text-[14px] font-bold text-[#18181B]">
+                  2. Syrup Sucralfate 10ml (TDS × 7d)
+                </p>
+              </div>
+
+              <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED] space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                  ABHA Health Locker Sync
+                </span>
+                <p className="text-[14px] font-bold text-[#166534] flex items-center gap-1.5">
+                  <CheckCircle2 size={14} />
+                  <span>FHIR R4 DiagnosticReport Bundled</span>
+                </p>
+                <p className="text-[12px] text-[#71717A]">
+                  Synced to Patient ABHA Address: dpatil@abdm
+                </p>
+              </div>
+
+              <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED] space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                  Follow-up &amp; Lifestyle
+                </span>
+                <p className="text-[14px] font-bold text-[#18181B]">
+                  Review in 2 weeks
+                </p>
+                <p className="text-[12px] text-[#006A61] font-medium">
+                  AYUSH Ahara dietary modifications advised
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Red Flag Alert Banner (for acute triage cases) */}
+        {encounterId === 'enc-002' ? (
+          <RedFlagBanner alert={DEMO_RED_FLAG_ENC002} />
+        ) : (
+          <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl px-5 py-3 flex items-center justify-between shadow-xs">
+            <div className="flex items-center gap-3 text-[#166534]">
+              <ShieldCheck size={18} className="text-[#16A34A] shrink-0" />
+              <p className="text-[13px] font-medium">
+                <strong className="font-bold">No acute red flags</strong> detected during multilingual patient intake.
+              </p>
+            </div>
+            <span className="text-[11px] font-bold text-[#166534] uppercase tracking-wider bg-white px-2 py-0.5 rounded border border-[#BBF7D0]">
+              Triage Clear
+            </span>
+          </div>
+        )}
+
+        {/* ─── 2. PRIMARY CLINICAL SUMMARY (Visual Center) ───────────── */}
+        <section className="bg-white rounded-3xl p-6 md:p-8 border border-[#E1E2ED] shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E1E2ED]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#004AC6]/10 text-[#004AC6] flex items-center justify-center">
+                <Sparkles size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-[18px] font-bold text-[#18181B] tracking-tight">
+                    AI-Assisted Clinical Summary
+                  </h2>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#004AC6] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#BFDBFE]">
+                    Pre-Consultation Synthesis
+                  </span>
+                </div>
+                <p className="text-[12px] font-semibold text-[#004AC6] mt-0.5">
+                  Physician review required • Synthesized from Marathi voice intake &amp; 3 scanned documents
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => openEvidenceDrawer('fact-001')}
+              className="px-3.5 py-1.5 rounded-xl border border-[#E1E2ED] text-[12px] font-bold text-[#004AC6] bg-[#FAF8FF] hover:bg-[#EFF6FF] transition-all flex items-center gap-1.5 self-start sm:self-auto"
+            >
+              <Search size={13} />
+              <span>Inspect Source Evidence</span>
+            </button>
+          </div>
+
+          {/* Clean 2x2 Fact Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Fact 1: Chief Complaint */}
+            <div className="bg-[#FAF8FF] p-5 rounded-2xl border border-[#E1E2ED] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
                   Chief Complaint
                 </span>
-                <p className="text-[15px] font-bold text-[#18181B] mt-1">
-                  Epigastric pain &amp; gastric discomfort
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <ProvenanceChip tier={3} sourceType="INTERVIEW" confidence={0.92} />
-                  <span className="text-[11px] text-[#71717A]">Marathi voice input</span>
-                </div>
+                <ProvenanceChip tier={3} sourceType="INTERVIEW" confidence={0.92} />
               </div>
-
-              {/* Onset & Duration */}
-              <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED]">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">
-                  Duration &amp; Onset
-                </span>
-                <p className="text-[15px] font-bold text-[#18181B] mt-1">
-                  3 months (Gradual worsening)
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <ProvenanceChip tier={3} sourceType="INTERVIEW" confidence={0.89} />
-                  <span className="text-[11px] text-[#71717A]">Reported continuous</span>
-                </div>
-              </div>
-
-              {/* Pain Quality & Character */}
-              <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED]">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">
-                  Sensation &amp; Character
-                </span>
-                <p className="text-[15px] font-bold text-[#18181B] mt-1">
-                  Burning &amp; sharp sensation after meals
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <ProvenanceChip tier={3} sourceType="INTERVIEW" confidence={0.92} />
-                  <span className="text-[11px] text-[#71717A]">Post-prandial trigger</span>
-                </div>
-              </div>
-
-              {/* AYUSH Ahara / Vihara Lifestyle */}
-              <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED]">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#006A61]">
-                  AYUSH Ahara &amp; Vihara Factors
-                </span>
-                <p className="text-[14px] font-semibold text-[#18181B] mt-1">
-                  Ahara: Irregular timing, spicy/oily food • Vihara: Disturbed sleep
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <ProvenanceChip tier={3} sourceType="INTERVIEW" confidence={0.88} />
-                  <span className="text-[11px] text-[#006A61] font-medium">Dietary lifestyle correlation</span>
-                </div>
-              </div>
+              <p className="text-[16px] font-bold text-[#18181B]">
+                Epigastric burning pain &amp; indigestion
+              </p>
+              <p className="text-[12px] text-[#71717A]">
+                Source: Patient voice intake (Bhashini Marathi ASR)
+              </p>
             </div>
-          </div>
 
-          {/* Conflict Resolution Card (If present) */}
-          {conflicts.length > 0 && (
-            <div className="space-y-3">
+            {/* Fact 2: Duration */}
+            <div className="bg-[#FAF8FF] p-5 rounded-2xl border border-[#E1E2ED] space-y-2">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[#D97706]">
-                  <AlertTriangle size={18} />
-                  <h3 className="text-[15px] font-bold text-[#18181B]">
-                    Clinical Inconsistency Detection
-                  </h3>
-                </div>
-                <span className="text-[12px] text-[#71717A]">
-                  1 conflict flagged between document &amp; patient statement
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                  Duration
                 </span>
+                <ProvenanceChip tier={3} sourceType="INTERVIEW" confidence={0.89} />
               </div>
-
-              {conflicts.map((conflict) => (
-                <ConflictCard
-                  key={conflict.id}
-                  conflict={conflict}
-                  onResolve={handleResolveConflict}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Extracted Clinical Facts & OCR Findings */}
-          <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-[16px] font-bold text-[#18181B]">
-                  Extracted Clinical Facts ({facts.length})
-                </h3>
-                <p className="text-[12px] text-[#71717A]">
-                  Click any fact to inspect source evidence crops and OCR confidence.
-                </p>
-              </div>
-              <span className="text-[12px] text-[#004AC6] font-semibold">
-                {Object.values(verifiedFacts).filter(Boolean).length} of {facts.length} verified
-              </span>
+              <p className="text-[16px] font-bold text-[#18181B]">
+                3 months (Gradual worsening)
+              </p>
+              <p className="text-[12px] text-[#71717A]">
+                Source: Patient voice intake
+              </p>
             </div>
 
-            <div className="divide-y divide-[#F4F4F5] border border-[#E1E2ED] rounded-2xl overflow-hidden">
-              {facts.map((fact) => {
-                const isFactVerified = verifiedFacts[fact.id]
-                return (
-                  <div
-                    key={fact.id}
-                    className="p-4 bg-white hover:bg-[#FAF8FF] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div
-                      onClick={() => openEvidenceDrawer(fact.id)}
-                      className="flex-1 cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#71717A]">
-                          {fact.domain} • {fact.fieldName.replace(/_/g, ' ')}
-                        </span>
-                        {fact.conflictStatus === 'IN_CONFLICT' && (
-                          <span className="text-[10px] font-bold uppercase px-1.5 py-0.2 rounded bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]">
-                            Conflict
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[15px] font-bold text-[#18181B] group-hover:text-[#004AC6] transition-colors">
-                        {fact.rawValue}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <ProvenanceChip
-                          tier={fact.confidenceTier}
-                          sourceType={fact.sourceType}
-                          confidence={fact.ocrConfidence || fact.confidence}
-                        />
-                        {fact.sourceText && (
-                          <span className="text-[11px] text-[#71717A] italic font-mono truncate max-w-xs">
-                            &quot;{fact.sourceText}&quot;
-                          </span>
-                        )}
-                      </div>
-                    </div>
+            {/* Fact 3: Character & Aggravation */}
+            <div className="bg-[#FAF8FF] p-5 rounded-2xl border border-[#E1E2ED] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                  Character &amp; Aggravation
+                </span>
+                <ProvenanceChip tier={3} sourceType="INTERVIEW" confidence={0.92} />
+              </div>
+              <p className="text-[16px] font-bold text-[#18181B]">
+                Burning / acidity, aggravated post-prandial
+              </p>
+              <p className="text-[12px] text-[#71717A]">
+                Source: Patient touch &amp; voice intake
+              </p>
+            </div>
 
-                    {/* Verification Actions */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={() => openEvidenceDrawer(fact.id)}
-                        className="px-3 py-1.5 rounded-xl border border-[#E1E2ED] text-[12px] font-semibold text-[#52525B] hover:text-[#004AC6] hover:bg-[#EFF6FF] transition-all flex items-center gap-1"
-                      >
-                        <Search size={13} />
-                        <span>Inspect</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleToggleFactVerification(fact.id)}
-                        className={cn(
-                          'px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all flex items-center gap-1',
-                          isFactVerified
-                            ? 'bg-[#16A34A] text-white'
-                            : 'bg-[#F4F4F5] text-[#52525B] hover:bg-[#E4E4E7]'
-                        )}
-                      >
-                        <CheckCircle2 size={13} />
-                        <span>{isFactVerified ? 'Verified' : 'Verify'}</span>
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
+            {/* Fact 4: Trigger & Lifestyle */}
+            <div className="bg-[#FAF8FF] p-5 rounded-2xl border border-[#E1E2ED] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#006A61]">
+                  Trigger &amp; AYUSH Lifestyle Factor
+                </span>
+                <ProvenanceChip tier={3} sourceType="INTERVIEW" confidence={0.88} />
+              </div>
+              <p className="text-[16px] font-bold text-[#18181B]">
+                Stress, disturbed sleep &amp; irregular spicy food
+              </p>
+              <p className="text-[12px] text-[#006A61] font-medium">
+                Source: AYUSH Ahara &amp; Vihara questionnaire
+              </p>
             </div>
           </div>
+        </section>
 
-          {/* Completeness & Timeline Tabs */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Completeness Audit */}
-            <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs">
-              <h3 className="text-[16px] font-bold text-[#18181B] mb-1">
-                Intake Completeness
-              </h3>
-              <p className="text-[12px] text-[#71717A] mb-4">
-                Structured domain audit for clinical decision readiness.
-              </p>
-              <CompletenessGrid entries={DEMO_COMPLETENESS_ENC001} />
-            </div>
+        {/* ─── 3. SECONDARY CLINICAL INFORMATION IN STRICT ORDER ──────── */}
 
-            {/* Reconstructed Patient Timeline */}
-            <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs">
-              <h3 className="text-[16px] font-bold text-[#18181B] mb-1">
-                Longitudinal Patient Timeline
+        {/* SECTION A: Clinical Alerts / Discrepancies */}
+        {conflicts.length > 0 && (
+          <section className="space-y-3">
+            <h3 className="text-[16px] font-bold text-[#18181B]">
+              A. Clinical Discrepancy &amp; Verification
+            </h3>
+            {conflicts.map((conflict) => (
+              <ConflictCard
+                key={conflict.id}
+                conflict={conflict}
+                onResolve={handleResolveConflict}
+              />
+            ))}
+          </section>
+        )}
+
+        {/* SECTION B: Medical Documents */}
+        <section className="bg-white rounded-3xl p-6 md:p-8 border border-[#E1E2ED] shadow-xs space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-[#E1E2ED]">
+            <div>
+              <h3 className="text-[17px] font-bold text-[#18181B]">
+                B. Scanned Medical Documents ({DEMO_DOCUMENTS_ENC001.length})
               </h3>
-              <p className="text-[12px] text-[#71717A] mb-4">
-                Historical records merged with current intake session.
+              <p className="text-[12px] text-[#71717A]">
+                Physical records scanned at kiosk with sub-second OCR extraction.
               </p>
-              <Timeline events={DEMO_TIMELINE_ENC001} />
             </div>
+            <span className="text-[11px] font-bold text-[#166534] bg-[#F0FDF4] px-2.5 py-1 rounded-full border border-[#BBF7D0]">
+              All Documents Processed
+            </span>
           </div>
-        </div>
 
-        {/* ─── RIGHT COLUMN (4 cols): Attached Documents & Physician Panel */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Attached Medical Documents */}
-          <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[16px] font-bold text-[#18181B] flex items-center gap-2">
-                <FileText size={18} className="text-[#004AC6]" />
-                <span>Scanned Documents ({DEMO_DOCUMENTS_ENC001.length})</span>
-              </h3>
-            </div>
-
-            <div className="space-y-3">
-              {DEMO_DOCUMENTS_ENC001.map((doc) => (
-                <div
-                  key={doc.id}
-                  onClick={() => openEvidenceDrawer(facts[1]?.id || 'fact-002')}
-                  className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED] hover:border-[#004AC6] transition-all cursor-pointer group"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-[#EFF6FF] text-[#004AC6] px-2 py-0.5 rounded">
-                        {doc.documentType.replace(/_/g, ' ')}
-                      </span>
-                      <h4 className="text-[14px] font-bold text-[#18181B] group-hover:text-[#004AC6] transition-colors mt-1.5">
-                        {doc.originalFilename}
-                      </h4>
-                    </div>
-                    <span className="text-[11px] font-mono font-bold text-[#16A34A] bg-[#F0FDF4] px-1.5 py-0.5 rounded border border-[#BBF7D0]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {DEMO_DOCUMENTS_ENC001.map((doc) => (
+              <div
+                key={doc.id}
+                onClick={() => openEvidenceDrawer(facts[1]?.id || 'fact-002')}
+                className="bg-[#FAF8FF] p-5 rounded-2xl border border-[#E1E2ED] hover:border-[#004AC6] transition-all cursor-pointer group flex flex-col justify-between gap-4 shadow-xs"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[9px] font-bold uppercase tracking-wider bg-[#EFF6FF] text-[#004AC6] px-2 py-0.5 rounded">
+                      {doc.documentType.replace(/_/g, ' ')}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold text-[#166534] bg-[#F0FDF4] px-1.5 py-0.5 rounded border border-[#BBF7D0]">
                       {Math.round((doc.ocrConfidence || 0.9) * 100)}% OCR
                     </span>
                   </div>
-
-                  <div className="flex items-center justify-between mt-3 text-[12px] text-[#71717A] pt-2 border-t border-[#E1E2ED]">
-                    <span>{doc.extractedFactsCount || 4} facts extracted</span>
-                    <span className="text-[#004AC6] font-semibold group-hover:underline flex items-center gap-0.5">
-                      <span>View Crop</span>
-                      <ExternalLink size={12} />
-                    </span>
-                  </div>
+                  <h4 className="text-[14px] font-bold text-[#18181B] group-hover:text-[#004AC6] transition-colors">
+                    {doc.originalFilename}
+                  </h4>
                 </div>
-              ))}
+
+                <div className="flex items-center justify-between text-[11px] text-[#71717A] pt-3 border-t border-[#E1E2ED]">
+                  <span>{doc.extractedFactsCount || 4} facts extracted</span>
+                  <span className="text-[#004AC6] font-bold flex items-center gap-1 group-hover:underline">
+                    <span>Inspect Crop</span>
+                    <ExternalLink size={11} />
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* SECTION C & D: Clinical Completeness + Longitudinal Timeline */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Section C: Completeness */}
+          <div className="bg-white rounded-3xl p-6 md:p-7 border border-[#E1E2ED] shadow-xs space-y-4">
+            <div>
+              <h3 className="text-[17px] font-bold text-[#18181B]">
+                C. 11-Domain Intake Completeness
+              </h3>
+              <p className="text-[12px] text-[#71717A]">
+                Structured domain audit for clinical decision readiness.
+              </p>
             </div>
+            <CompletenessGrid entries={DEMO_COMPLETENESS_ENC001} />
           </div>
 
-          {/* Physician Action & Decision Console */}
-          <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs space-y-4">
-            <h3 className="text-[16px] font-bold text-[#18181B] flex items-center gap-2">
-              <Edit3 size={18} className="text-[#004AC6]" />
-              <span>Consultation Notes &amp; Actions</span>
-            </h3>
-
+          {/* Section D: Timeline */}
+          <div className="bg-white rounded-3xl p-6 md:p-7 border border-[#E1E2ED] shadow-xs space-y-4">
             <div>
-              <label className="text-[12px] font-bold text-[#71717A] uppercase tracking-wider block mb-1.5">
-                Physician Examination Notes
-              </label>
-              <textarea
-                value={physicianNotes}
-                onChange={(e) => setPhysicianNotes(e.target.value)}
-                placeholder="Enter clinical examination findings, differential diagnosis, or prescription directions..."
-                className="w-full h-32 text-[13px] p-3 rounded-xl border border-[#E1E2ED] bg-[#FAF8FF] focus:bg-white focus:outline-none focus:border-[#004AC6] resize-none transition-all"
-              />
+              <h3 className="text-[17px] font-bold text-[#18181B]">
+                D. Longitudinal Health Timeline
+              </h3>
+              <p className="text-[12px] text-[#71717A]">
+                Past hospital admissions merged with today&apos;s intake.
+              </p>
+            </div>
+            <Timeline events={DEMO_TIMELINE_ENC001} />
+          </div>
+        </section>
+
+        {/* SECTION E: Physician Decision Console */}
+        <section className="bg-white rounded-3xl p-6 md:p-8 border-2 border-[#004AC6]/30 shadow-md space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-[#E1E2ED]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#004AC6]/10 text-[#004AC6] flex items-center justify-center">
+                <Edit3 size={18} />
+              </div>
+              <div>
+                <h3 className="text-[17px] font-bold text-[#18181B]">
+                  E. Physician Decision Console
+                </h3>
+                <p className="text-[12px] text-[#71717A]">
+                  Review complete. Enter physical examination findings and finalize the consultation.
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-bold text-[#004AC6] bg-[#EFF6FF] px-2.5 py-1 rounded-full border border-[#BFDBFE]">
+              Physician Action
+            </span>
+          </div>
+
+          <div>
+            <label className="text-[11px] font-bold text-[#434655] uppercase tracking-wider block mb-1.5">
+              Physical Examination &amp; Clinical Notes
+            </label>
+            <textarea
+              value={physicianNotes}
+              onChange={(e) => setPhysicianNotes(e.target.value)}
+              placeholder="Enter findings from abdomen palpation, differential diagnosis, or prescription instructions..."
+              className="w-full h-28 text-[13px] p-3.5 rounded-2xl border border-[#E1E2ED] bg-[#FAF8FF] focus:bg-white focus:outline-none focus:border-[#004AC6] resize-none transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+            <button
+              onClick={() => {
+                setIsIntakeVerified(true)
+                addToast({
+                  type: 'success',
+                  title: 'Intake Verified by Physician',
+                  body: 'All clinical intake items marked as physician verified.',
+                })
+              }}
+              className={cn(
+                'w-full sm:w-auto px-5 py-2.5 rounded-xl border text-[13px] font-bold transition-all flex items-center justify-center gap-2 active:scale-98',
+                isIntakeVerified
+                  ? 'bg-[#F0FDF4] border-[#BBF7D0] text-[#166534]'
+                  : 'bg-[#FAF8FF] border-[#E1E2ED] hover:bg-[#F4F4F5] text-[#18181B]'
+              )}
+            >
+              <CheckCircle2 size={15} className={isIntakeVerified ? 'text-[#16A34A]' : 'text-[#71717A]'} />
+              <span>{isIntakeVerified ? 'Intake Verified by Physician ✓' : 'Mark Intake Verified'}</span>
+            </button>
+
+            <button
+              onClick={handleCompleteEncounter}
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#004AC6] hover:bg-[#003EA8] text-white text-[13px] font-bold transition-all shadow-xs flex items-center justify-center gap-2 active:scale-98"
+            >
+              <span>Finalize Consultation &amp; Sync EHR</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </section>
+      </main>
+
+      {/* ─── PRESCRIPTION VIEW / PRINT MODAL ────────────────────────── */}
+      {prescriptionModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-3xl p-6 sm:p-8 border border-[#E1E2ED] shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-[#E1E2ED]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#004AC6] text-white flex items-center justify-center font-bold">
+                  V
+                </div>
+                <div>
+                  <h3 className="text-[18px] font-bold text-[#18181B]">
+                    Hospital OPD Electronic Prescription
+                  </h3>
+                  <p className="text-[12px] text-[#71717A]">
+                    Department of Internal Medicine • Room 104 • OPD Slot A
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setPrescriptionModalOpen(false)}
+                className="p-2 rounded-xl text-[#71717A] hover:text-[#18181B] hover:bg-[#F4F4F5]"
+              >
+                <X size={18} />
+              </button>
             </div>
 
-            <div className="space-y-2 pt-2">
-              <button
-                onClick={() => {
-                  setIsVerified(true)
-                  addToast({
-                    type: 'success',
-                    title: 'Clinical Summary Verified',
-                    body: 'All clinical intake items marked as physician verified.',
-                  })
-                }}
-                className={cn(
-                  'w-full py-2.5 rounded-xl border text-[13px] font-bold transition-all flex items-center justify-center gap-2 active:scale-98',
-                  isVerified
-                    ? 'bg-[#F0FDF4] border-[#BBF7D0] text-[#166534]'
-                    : 'bg-[#FAF8FF] border-[#E1E2ED] hover:bg-[#F4F4F5] text-[#18181B]'
-                )}
-              >
-                <CheckCircle2 size={15} className={isVerified ? 'text-[#16A34A]' : 'text-[#71717A]'} />
-                <span>{isVerified ? 'Intake Verified by Physician' : 'Mark Intake Verified'}</span>
-              </button>
+            {/* Patient & Physician Details */}
+            <div className="grid grid-cols-2 gap-4 bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED] text-[13px]">
+              <div>
+                <p className="text-[#71717A] text-[11px] font-bold uppercase">Patient</p>
+                <p className="font-bold text-[#18181B]">{patient?.name || 'Dhananjay Patil'}</p>
+                <p className="text-[#71717A]">{patient?.age || 67}M • Token {encounter?.tokenNumber || 'A-028'}</p>
+                <p className="font-mono text-[#004AC6] text-[11px]">ABHA: 12-3456-7890-1234</p>
+              </div>
 
-              <button
-                onClick={handleCompleteEncounter}
-                className="w-full py-3 rounded-xl bg-[#004AC6] hover:bg-[#003EA8] text-white text-[14px] font-bold transition-all shadow-sm flex items-center justify-center gap-2 active:scale-98"
-              >
-                <span>Finalize Consultation &amp; Sync EHR</span>
-                <ChevronRight size={16} />
-              </button>
+              <div className="text-right">
+                <p className="text-[#71717A] text-[11px] font-bold uppercase">Physician</p>
+                <p className="font-bold text-[#18181B]">Dr. Sunita Rao, MD</p>
+                <p className="text-[#71717A]">Reg. No: MMC-2012-48291</p>
+                <p className="text-[#166534] text-[11px] font-bold">Date: 31 Aug 2026</p>
+              </div>
+            </div>
+
+            {/* Rx Items */}
+            <div className="space-y-3">
+              <h4 className="text-[14px] font-bold text-[#18181B] flex items-center gap-1.5">
+                <span className="font-serif italic text-[#004AC6] text-[18px]">℞</span>
+                <span>Prescribed Medications</span>
+              </h4>
+
+              <div className="space-y-2">
+                <div className="p-3.5 rounded-xl border border-[#E1E2ED] bg-white flex items-center justify-between text-[13px]">
+                  <div>
+                    <p className="font-bold text-[#18181B]">1. Tab. Pantoprazole 40 mg</p>
+                    <p className="text-[12px] text-[#71717A]">1 Tablet • Once daily before breakfast (OD) • 14 days</p>
+                  </div>
+                  <span className="text-[11px] font-bold bg-[#EFF6FF] text-[#004AC6] px-2 py-0.5 rounded">
+                    Oral
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-[#E1E2ED] bg-white flex items-center justify-between text-[13px]">
+                  <div>
+                    <p className="font-bold text-[#18181B]">2. Syrup Sucralfate 10 ml</p>
+                    <p className="text-[12px] text-[#71717A]">2 Teaspoons • Three times daily after meals (TDS) • 7 days</p>
+                  </div>
+                  <span className="text-[11px] font-bold bg-[#EFF6FF] text-[#004AC6] px-2 py-0.5 rounded">
+                    Oral
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Clinical Diagnosis & Notes */}
+            <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED] space-y-1 text-[13px]">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">Diagnosis &amp; Advice</p>
+              <p className="font-semibold text-[#18181B]">Chronic Acid Peptic Disease / Dyspepsia (Pre-consultation verified)</p>
+              <p className="text-[12px] text-[#52525B]">Advice: Avoid oily, excessively spicy food. Sleep on elevated pillow. Follow up in 2 weeks if symptoms persist.</p>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-[11px] text-[#71717A] flex items-center gap-1">
+                <ShieldCheck size={14} className="text-[#16A34A]" />
+                <span>Digitally signed via ABDM Bridge</span>
+              </span>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    window.print()
+                  }}
+                  className="px-4 py-2 rounded-xl bg-[#004AC6] text-white text-[13px] font-bold hover:bg-[#003EA8] transition-all flex items-center gap-1.5 shadow-xs"
+                >
+                  <Printer size={14} />
+                  <span>Print Prescription</span>
+                </button>
+                <button
+                  onClick={() => setPrescriptionModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-[#E1E2ED] text-[#52525B] hover:text-[#18181B] text-[13px] font-semibold"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      )}
     </div>
   )
 }

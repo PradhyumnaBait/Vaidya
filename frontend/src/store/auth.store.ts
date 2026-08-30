@@ -9,11 +9,11 @@ interface AuthStore {
   logout: () => void
 }
 
-// Demo users — replace with real auth backend later
+// Demo users for seamless demonstration
 export const DEMO_USERS: Record<Role, AuthUser> = {
-  patient: { id: 'u-patient', name: 'Patient User', role: 'patient', languagePreferences: ['en', 'hi'] },
-  doctor: { id: 'u-dr-mehta', name: 'Dr. R. Mehta', role: 'doctor', department: 'Internal Medicine', languagePreferences: ['en', 'hi'] },
-  nursing: { id: 'u-nurse-kumar', name: 'Nurse S. Kumar', role: 'nursing', department: 'OPD', languagePreferences: ['en', 'hi'] },
+  patient: { id: 'u-patient-patil', name: 'Dhananjay Patil', role: 'patient', languagePreferences: ['mr', 'en'] },
+  doctor: { id: 'u-dr-rao', name: 'Dr. Sunita Rao', role: 'doctor', department: 'Internal Medicine', languagePreferences: ['en', 'mr', 'hi'] },
+  nursing: { id: 'u-nurse-kumar', name: 'Nurse S. Kumar', role: 'nursing', department: 'OPD Triage', languagePreferences: ['en', 'hi'] },
   admin: { id: 'u-admin-singh', name: 'Admin A. Singh', role: 'admin', languagePreferences: ['en'] },
 }
 

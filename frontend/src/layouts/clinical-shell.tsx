@@ -69,18 +69,24 @@ export function ClinicalShell({ children }: { children: ReactNode }) {
             )
           })}
         </nav>
-        <div className="px-5 py-4 border-t border-[var(--color-border)]">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-full bg-[var(--color-surface-subtle)] flex items-center justify-center text-[13px] font-medium">
+        <div className="px-5 py-4 border-t border-[var(--color-border)] space-y-2">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-full bg-[#004AC6]/10 text-[#004AC6] flex items-center justify-center text-[13px] font-bold">
               {user?.name?.slice(0, 2) ?? 'DR'}
             </div>
             <div>
-              <p className="text-[13px] font-medium">{user?.name}</p>
+              <p className="text-[13px] font-bold text-[#18181B]">{user?.name}</p>
               <p className="text-[11px] text-[var(--color-text-muted)] capitalize">{user?.role}</p>
             </div>
           </div>
-          <button onClick={logout} className="flex items-center gap-2 text-[13px] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">
-            <LogOut size={14} /> Logout
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-[12px] font-medium text-[#71717A] hover:text-[#004AC6] transition-colors"
+          >
+            ← Return to Homepage
+          </Link>
+          <button onClick={logout} className="flex items-center gap-2 text-[12px] text-[#DC2626] hover:underline transition-colors">
+            <LogOut size={13} /> Logout
           </button>
         </div>
       </aside>

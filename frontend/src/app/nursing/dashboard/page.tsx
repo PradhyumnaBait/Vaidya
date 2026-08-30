@@ -69,42 +69,52 @@ export default function NursingDashboardPage() {
             </p>
           </div>
 
-          {/* KPI Counters */}
+          {/* Top KPIs */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="bg-[#FAF8FF] border border-[#E1E2ED] px-4 py-2 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#004AC6]/10 text-[#004AC6] flex items-center justify-center font-bold text-sm">
+            <div className="bg-[#FAF8FF] border border-[#E1E2ED] px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#004AC6]/10 text-[#004AC6] flex items-center justify-center font-bold text-sm">
                 <Users size={16} />
               </div>
               <div>
-                <p className="text-[11px] text-[#71717A] uppercase font-bold tracking-wider">In Waiting Hall</p>
-                <p className="text-[18px] font-bold text-[#18181B] leading-none">14</p>
+                <p className="text-[10px] text-[#71717A] uppercase font-bold tracking-wider">Patients Waiting</p>
+                <p className="text-[17px] font-extrabold text-[#18181B] leading-none">14</p>
               </div>
             </div>
 
-            <div className="bg-[#FEF2F2] border border-[#FECACA] px-4 py-2 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#DC2626]/10 text-[#DC2626] flex items-center justify-center font-bold text-sm">
+            <div className="bg-[#FEF2F2] border border-[#FECACA] px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#DC2626]/10 text-[#DC2626] flex items-center justify-center font-bold text-sm">
                 <AlertTriangle size={16} />
               </div>
               <div>
-                <p className="text-[11px] text-[#991B1B] uppercase font-bold tracking-wider">Active Alerts</p>
-                <p className="text-[18px] font-bold text-[#991B1B] leading-none">{alertAcknowledged ? '0' : '1'}</p>
+                <p className="text-[10px] text-[#991B1B] uppercase font-bold tracking-wider">Priority Alerts</p>
+                <p className="text-[17px] font-extrabold text-[#991B1B] leading-none">{alertAcknowledged ? '0' : '1'}</p>
               </div>
             </div>
 
-            <div className="bg-[#F0FDF4] border border-[#BBF7D0] px-4 py-2 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-[#16A34A]/10 text-[#16A34A] flex items-center justify-center font-bold text-sm">
+            <div className="bg-[#FAF8FF] border border-[#E1E2ED] px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#006A61]/10 text-[#006A61] flex items-center justify-center font-bold text-sm">
                 <Activity size={16} />
               </div>
               <div>
-                <p className="text-[11px] text-[#166534] uppercase font-bold tracking-wider">Kiosk Station</p>
-                <p className="text-[18px] font-bold text-[#166534] leading-none">Online</p>
+                <p className="text-[10px] text-[#006A61] uppercase font-bold tracking-wider">Active Intake</p>
+                <p className="text-[17px] font-extrabold text-[#006A61] leading-none">3</p>
+              </div>
+            </div>
+
+            <div className="bg-[#F0FDF4] border border-[#BBF7D0] px-4 py-2 rounded-2xl flex items-center gap-3 shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#16A34A]/10 text-[#16A34A] flex items-center justify-center font-bold text-sm">
+                <Thermometer size={16} />
+              </div>
+              <div>
+                <p className="text-[10px] text-[#166534] uppercase font-bold tracking-wider">Vitals Pending</p>
+                <p className="text-[17px] font-extrabold text-[#166534] leading-none">2</p>
               </div>
             </div>
 
             <button
               onClick={() => {
                 setIsRefreshing(true)
-                setTimeout(() => setIsRefreshing(false), 500)
+                setTimeout(() => setIsRefreshing(false), 400)
               }}
               className={cn(
                 'p-2.5 rounded-xl border border-[#E1E2ED] bg-white text-[#52525B] hover:text-[#18181B] hover:bg-[#F4F4F5] transition-all shadow-xs active:scale-95',
@@ -112,35 +122,35 @@ export default function NursingDashboardPage() {
               )}
               title="Refresh Triage Queue"
             >
-              <RefreshCw size={18} />
+              <RefreshCw size={17} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* ─── Main Triage Layout ────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto p-6 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Triage Alert Banner & Waiting Queue */}
+      {/* ─── Main Triage Workspace ────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto p-6 md:p-8 w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column: Urgent Alerts & Live Intake Queue */}
         <div className="lg:col-span-8 space-y-6">
-          {/* Active Urgent Alert Banner */}
+          {/* Urgent Cardiac Triage Alert Banner */}
           {!alertAcknowledged ? (
-            <div className="border border-[#DC2626]/30 border-l-4 border-l-[#DC2626] rounded-2xl bg-[#FEF2F2] p-5 shadow-sm space-y-3">
+            <div className="border border-[#DC2626]/30 border-l-4 border-l-[#DC2626] rounded-3xl bg-[#FEF2F2] p-6 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-[#991B1B]">
-                  <ShieldAlert size={20} className="text-[#DC2626]" />
-                  <span className="text-[15px] font-bold">
+                <div className="flex items-center gap-2.5 text-[#991B1B]">
+                  <ShieldAlert size={22} className="text-[#DC2626]" />
+                  <span className="text-[16px] font-bold">
                     Urgent Clinical Triage Alert • Cardiac Rule Flag
                   </span>
                 </div>
-                <span className="text-[11px] font-mono font-bold bg-[#DC2626] text-white px-2 py-0.5 rounded">
-                  PRIORITY 1
+                <span className="text-[10px] font-mono font-bold bg-[#DC2626] text-white px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                  Priority 1
                 </span>
               </div>
 
-              <div className="bg-white rounded-xl p-4 border border-[#FECACA] space-y-2">
+              <div className="bg-white rounded-2xl p-4 border border-[#FECACA] space-y-2">
                 <div className="flex items-center justify-between text-[12px] text-[#71717A]">
                   <span className="font-bold text-[#18181B]">Patient: Priya Menon (42F • Token A-023)</span>
-                  <span>Triggered at Kiosk Station 01</span>
+                  <span>Triggered at Kiosk Station 01 • 10:31 AM</span>
                 </div>
                 <p className="text-[14px] text-[#991B1B] font-semibold italic">
                   &quot;{DEMO_RED_FLAG_ENC002.triggerText}&quot;
@@ -150,31 +160,40 @@ export default function NursingDashboardPage() {
                 </p>
               </div>
 
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-[12px] text-[#991B1B] font-medium flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <span className="text-[12px] text-[#991B1B] font-semibold flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#DC2626] animate-ping" />
                   Immediate nursing assessment recommended
                 </span>
 
-                <button
-                  onClick={handleAcknowledgeAlert}
-                  className="px-4 py-2 rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white text-[13px] font-bold transition-all shadow-xs active:scale-95"
-                >
-                  Acknowledge &amp; Triage Stable
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setVitalsModalOpen(true)}
+                    className="px-3.5 py-2 rounded-xl bg-white border border-[#FECACA] hover:bg-[#FAF8FF] text-[12px] font-bold text-[#991B1B] transition-all flex items-center gap-1.5 shadow-xs"
+                  >
+                    <Thermometer size={14} />
+                    <span>Log Vitals</span>
+                  </button>
+                  <button
+                    onClick={handleAcknowledgeAlert}
+                    className="px-4 py-2 rounded-xl bg-[#DC2626] hover:bg-[#B91C1C] text-white text-[12px] font-bold transition-all shadow-xs active:scale-95"
+                  >
+                    Acknowledge &amp; Triage Stable
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-2xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-2.5 text-[#166534]">
-                <CheckCircle2 size={18} className="text-[#16A34A]" />
+            <div className="bg-[#F0FDF4] border border-[#BBF7D0] rounded-3xl p-5 flex items-center justify-between shadow-xs">
+              <div className="flex items-center gap-3 text-[#166534]">
+                <CheckCircle2 size={20} className="text-[#16A34A] shrink-0" />
                 <span className="text-[14px] font-bold">
-                  Cardiac Alert for Priya Menon acknowledged • Case marked stable for OPD Review
+                  Cardiac Alert for Priya Menon acknowledged • Case prioritized for Physician Review
                 </span>
               </div>
               <button
                 onClick={() => setAlertAcknowledged(false)}
-                className="text-[12px] text-[#166534] underline font-medium"
+                className="text-[12px] text-[#166534] underline font-semibold"
               >
                 Reset Demo Alert
               </button>
@@ -182,17 +201,17 @@ export default function NursingDashboardPage() {
           )}
 
           {/* Operational Triage Queue */}
-          <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs space-y-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E1E2ED] shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-[18px] font-bold text-[#18181B]">
                   Live OPD Intake Queue
                 </h2>
                 <p className="text-[12px] text-[#71717A]">
-                  Track progress of patients at waiting hall kiosks.
+                  Track progress of outpatients at waiting hall kiosks.
                 </p>
               </div>
-              <span className="text-[12px] font-bold text-[#004AC6] bg-[#EFF6FF] px-3 py-1 rounded-full border border-[#BFDBFE]">
+              <span className="text-[11px] font-bold text-[#004AC6] bg-[#EFF6FF] px-3 py-1 rounded-full border border-[#BFDBFE]">
                 3 Active Cases
               </span>
             </div>
@@ -207,13 +226,13 @@ export default function NursingDashboardPage() {
                     className={cn(
                       'p-5 rounded-2xl border transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4',
                       isSelected
-                        ? 'bg-[#FAF8FF] border-[#004AC6] ring-2 ring-[#004AC6]/10'
+                        ? 'bg-[#FAF8FF] border-[#004AC6] ring-2 ring-[#004AC6]/10 shadow-xs'
                         : 'bg-white border-[#E1E2ED] hover:border-[#C3C6D7]'
                     )}
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#004AC6]/10 text-[#004AC6] flex flex-col items-center justify-center shrink-0">
-                        <span className="text-[9px] font-bold uppercase">OPD</span>
+                      <div className="w-12 h-12 rounded-2xl bg-[#004AC6]/10 text-[#004AC6] flex flex-col items-center justify-center shrink-0">
+                        <span className="text-[8px] font-bold uppercase">OPD</span>
                         <span className="text-[15px] font-extrabold font-mono leading-none">
                           {triageCase.tokenNumber === '23' ? 'A-023' : triageCase.tokenNumber === '31' ? 'A-028' : 'A-031'}
                         </span>
@@ -250,7 +269,7 @@ export default function NursingDashboardPage() {
                           e.stopPropagation()
                           setVitalsModalOpen(true)
                         }}
-                        className="px-3.5 py-2 rounded-xl border border-[#E1E2ED] bg-white hover:bg-[#FAF8FF] text-[12px] font-bold text-[#18181B] transition-all flex items-center gap-1.5"
+                        className="px-3.5 py-2 rounded-xl border border-[#E1E2ED] bg-white hover:bg-[#FAF8FF] text-[12px] font-bold text-[#18181B] transition-all flex items-center gap-1.5 shadow-xs"
                       >
                         <Thermometer size={14} className="text-[#004AC6]" />
                         <span>Log Vitals</span>
@@ -274,7 +293,7 @@ export default function NursingDashboardPage() {
           </div>
         </div>
 
-        {/* Right Column: Nursing Station Actions & Vitals Panel */}
+        {/* Right Column: Vitals Entry & Kiosk Health */}
         <div className="lg:col-span-4 space-y-6">
           {/* Quick Vital Entry Card */}
           <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs space-y-4">
@@ -283,32 +302,32 @@ export default function NursingDashboardPage() {
                 <Activity size={18} className="text-[#16A34A]" />
                 <span>Station Vitals Entry</span>
               </h3>
-              <span className="text-[11px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
-                Live
+              <span className="text-[10px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
+                Live Station
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#FAF8FF] p-3 rounded-xl border border-[#E1E2ED]">
-                <span className="text-[11px] font-bold text-[#71717A] uppercase">Blood Pressure</span>
+              <div className="bg-[#FAF8FF] p-3 rounded-2xl border border-[#E1E2ED]">
+                <span className="text-[10px] font-bold text-[#71717A] uppercase">Blood Pressure</span>
                 <p className="text-[18px] font-extrabold text-[#18181B] font-mono mt-0.5">{vitals.bp}</p>
                 <span className="text-[10px] text-[#71717A]">mmHg • Normal</span>
               </div>
 
-              <div className="bg-[#FAF8FF] p-3 rounded-xl border border-[#E1E2ED]">
-                <span className="text-[11px] font-bold text-[#71717A] uppercase">Heart Rate</span>
+              <div className="bg-[#FAF8FF] p-3 rounded-2xl border border-[#E1E2ED]">
+                <span className="text-[10px] font-bold text-[#71717A] uppercase">Heart Rate</span>
                 <p className="text-[18px] font-extrabold text-[#18181B] font-mono mt-0.5">{vitals.pulse}</p>
                 <span className="text-[10px] text-[#71717A]">bpm • Regular</span>
               </div>
 
-              <div className="bg-[#FAF8FF] p-3 rounded-xl border border-[#E1E2ED]">
-                <span className="text-[11px] font-bold text-[#71717A] uppercase">Oxygen SpO2</span>
+              <div className="bg-[#FAF8FF] p-3 rounded-2xl border border-[#E1E2ED]">
+                <span className="text-[10px] font-bold text-[#71717A] uppercase">Oxygen SpO2</span>
                 <p className="text-[18px] font-extrabold text-[#16A34A] font-mono mt-0.5">{vitals.spo2}</p>
                 <span className="text-[10px] text-[#16A34A]">Optimal</span>
               </div>
 
-              <div className="bg-[#FAF8FF] p-3 rounded-xl border border-[#E1E2ED]">
-                <span className="text-[11px] font-bold text-[#71717A] uppercase">Temperature</span>
+              <div className="bg-[#FAF8FF] p-3 rounded-2xl border border-[#E1E2ED]">
+                <span className="text-[10px] font-bold text-[#71717A] uppercase">Temperature</span>
                 <p className="text-[18px] font-extrabold text-[#18181B] font-mono mt-0.5">{vitals.temp}</p>
                 <span className="text-[10px] text-[#71717A]">Oral • Afebrile</span>
               </div>
@@ -316,7 +335,7 @@ export default function NursingDashboardPage() {
 
             <button
               onClick={() => setVitalsModalOpen(true)}
-              className="w-full py-2.5 rounded-xl bg-[#004AC6] text-white text-[13px] font-bold hover:bg-[#003EA8] transition-all flex items-center justify-center gap-1.5 active:scale-98"
+              className="w-full py-2.5 rounded-2xl bg-[#004AC6] text-white text-[13px] font-bold hover:bg-[#003EA8] transition-all flex items-center justify-center gap-1.5 active:scale-98 shadow-xs"
             >
               <span>Update Patient Vitals</span>
               <ChevronRight size={14} />
@@ -331,23 +350,23 @@ export default function NursingDashboardPage() {
             </h3>
 
             <div className="space-y-2.5 text-[13px]">
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FAF8FF] border border-[#E1E2ED]">
-                <span className="font-medium text-[#434655]">Station 01 (Main Lobby)</span>
-                <span className="text-[11px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
-                  ● Active (5173)
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-[#FAF8FF] border border-[#E1E2ED]">
+                <span className="font-semibold text-[#434655]">Station 01 (Main Lobby)</span>
+                <span className="text-[10px] font-bold text-[#166534] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
+                  ● Online (5173)
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FAF8FF] border border-[#E1E2ED]">
-                <span className="font-medium text-[#434655]">Optical Document Scanner</span>
-                <span className="text-[11px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-[#FAF8FF] border border-[#E1E2ED]">
+                <span className="font-semibold text-[#434655]">Optical Document Scanner</span>
+                <span className="text-[10px] font-bold text-[#166534] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
                   Ready
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FAF8FF] border border-[#E1E2ED]">
-                <span className="font-medium text-[#434655]">Thermal Token Dispenser</span>
-                <span className="text-[11px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-[#FAF8FF] border border-[#E1E2ED]">
+                <span className="font-semibold text-[#434655]">Thermal Token Dispenser</span>
+                <span className="text-[10px] font-bold text-[#166534] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
                   Paper OK (88%)
                 </span>
               </div>
@@ -359,11 +378,11 @@ export default function NursingDashboardPage() {
       {/* ─── Vitals Entry Modal ────────────────────────────────────── */}
       {vitalsModalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-[#E1E2ED] shadow-xl space-y-4 animate-scale-in">
+          <div className="bg-white rounded-3xl p-7 max-w-md w-full border border-[#E1E2ED] shadow-xl space-y-5 animate-scale-in">
             <div className="flex items-center justify-between border-b border-[#E1E2ED] pb-3">
               <h3 className="text-[18px] font-bold text-[#18181B] flex items-center gap-2">
                 <Thermometer size={20} className="text-[#004AC6]" />
-                <span>Log Clinical Vitals</span>
+                <span>Record Clinical Vitals</span>
               </h3>
               <button
                 onClick={() => setVitalsModalOpen(false)}
@@ -373,14 +392,14 @@ export default function NursingDashboardPage() {
               </button>
             </div>
 
-            <div className="space-y-3 text-[13px]">
+            <div className="space-y-3.5 text-[13px]">
               <div>
                 <label className="font-bold text-[#434655] block mb-1">Blood Pressure (Systolic / Diastolic)</label>
                 <input
                   type="text"
                   value={vitals.bp}
                   onChange={(e) => setVitals({ ...vitals, bp: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#E1E2ED] rounded-xl bg-[#FAF8FF] font-mono font-bold text-[14px]"
+                  className="w-full h-11 px-3.5 border border-[#E1E2ED] rounded-xl bg-[#FAF8FF] font-mono font-bold text-[14px]"
                 />
               </div>
 
@@ -390,7 +409,7 @@ export default function NursingDashboardPage() {
                   type="text"
                   value={vitals.pulse}
                   onChange={(e) => setVitals({ ...vitals, pulse: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#E1E2ED] rounded-xl bg-[#FAF8FF] font-mono font-bold text-[14px]"
+                  className="w-full h-11 px-3.5 border border-[#E1E2ED] rounded-xl bg-[#FAF8FF] font-mono font-bold text-[14px]"
                 />
               </div>
 
@@ -400,7 +419,7 @@ export default function NursingDashboardPage() {
                   type="text"
                   value={vitals.spo2}
                   onChange={(e) => setVitals({ ...vitals, spo2: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#E1E2ED] rounded-xl bg-[#FAF8FF] font-mono font-bold text-[14px]"
+                  className="w-full h-11 px-3.5 border border-[#E1E2ED] rounded-xl bg-[#FAF8FF] font-mono font-bold text-[14px]"
                 />
               </div>
 
@@ -410,7 +429,7 @@ export default function NursingDashboardPage() {
                   type="text"
                   value={vitals.temp}
                   onChange={(e) => setVitals({ ...vitals, temp: e.target.value })}
-                  className="w-full h-10 px-3 border border-[#E1E2ED] rounded-xl bg-[#FAF8FF] font-mono font-bold text-[14px]"
+                  className="w-full h-11 px-3.5 border border-[#E1E2ED] rounded-xl bg-[#FAF8FF] font-mono font-bold text-[14px]"
                 />
               </div>
             </div>
@@ -424,7 +443,7 @@ export default function NursingDashboardPage() {
               </button>
               <button
                 onClick={handleSaveVitals}
-                className="px-5 py-2 rounded-xl bg-[#004AC6] text-white text-[13px] font-bold hover:bg-[#003EA8] transition-all"
+                className="px-5 py-2 rounded-xl bg-[#004AC6] text-white text-[13px] font-bold hover:bg-[#003EA8] transition-all shadow-xs"
               >
                 Save Vitals Record
               </button>

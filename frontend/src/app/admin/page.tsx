@@ -29,7 +29,7 @@ export default function AdminOverviewPage() {
 
   const handleRefresh = () => {
     setIsRefreshing(true)
-    setTimeout(() => setIsRefreshing(false), 500)
+    setTimeout(() => setIsRefreshing(false), 400)
   }
 
   const filteredAuditEvents = useMemo(() => {
@@ -54,7 +54,7 @@ export default function AdminOverviewPage() {
             <div className="flex items-center gap-2 mb-1">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#FAF8FF] text-[#006A61] text-[11px] font-bold uppercase tracking-wider border border-[#86F2E4]">
                 <Building2 size={13} className="text-[#006A61]" />
-                Hospital Operations &amp; Clinical Audit
+                Hospital Operations &amp; System Health
               </span>
             </div>
             <h1 className="text-[26px] font-bold text-[#18181B] tracking-tight">
@@ -73,19 +73,19 @@ export default function AdminOverviewPage() {
             )}
             title="Refresh System Metrics"
           >
-            <RefreshCw size={18} />
+            <RefreshCw size={17} />
           </button>
         </div>
       </div>
 
       {/* ─── Main Admin Workspace ──────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto p-6 w-full flex-1 flex flex-col gap-6">
+      <div className="max-w-7xl mx-auto p-6 md:p-8 w-full flex-1 flex flex-col gap-6">
         {/* KPI Metrics Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Encounters */}
           <div className="bg-white p-5 rounded-3xl border border-[#E1E2ED] shadow-xs space-y-1">
             <div className="flex items-center justify-between text-[#71717A] mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider">Total OPD Intake</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">Total OPD Intake</span>
               <div className="w-8 h-8 rounded-xl bg-[#004AC6]/10 text-[#004AC6] flex items-center justify-center">
                 <Users size={16} />
               </div>
@@ -101,7 +101,7 @@ export default function AdminOverviewPage() {
           {/* Average Intake Duration */}
           <div className="bg-white p-5 rounded-3xl border border-[#E1E2ED] shadow-xs space-y-1">
             <div className="flex items-center justify-between text-[#71717A] mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider">Avg. Intake Time</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">Avg. Intake Duration</span>
               <div className="w-8 h-8 rounded-xl bg-[#006A61]/10 text-[#006A61] flex items-center justify-center">
                 <Clock size={16} />
               </div>
@@ -110,14 +110,14 @@ export default function AdminOverviewPage() {
               {Math.floor(DEMO_ADMIN_METRICS.avgIntakeDurationSec / 60)}m {DEMO_ADMIN_METRICS.avgIntakeDurationSec % 60}s
             </p>
             <p className="text-[12px] text-[#71717A] font-medium pt-1">
-              Touch &amp; Voice intake speed
+              Multilingual touch &amp; speech speed
             </p>
           </div>
 
           {/* Documents Processed */}
           <div className="bg-white p-5 rounded-3xl border border-[#E1E2ED] shadow-xs space-y-1">
             <div className="flex items-center justify-between text-[#71717A] mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider">Scanned Records</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">Records Processed</span>
               <div className="w-8 h-8 rounded-xl bg-[#2563EB]/10 text-[#2563EB] flex items-center justify-center">
                 <FileText size={16} />
               </div>
@@ -133,7 +133,7 @@ export default function AdminOverviewPage() {
           {/* AYUSH Protocols */}
           <div className="bg-white p-5 rounded-3xl border border-[#E1E2ED] shadow-xs space-y-1">
             <div className="flex items-center justify-between text-[#71717A] mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider">AYUSH Assessments</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">AYUSH Assessments</span>
               <div className="w-8 h-8 rounded-xl bg-[#16A34A]/10 text-[#16A34A] flex items-center justify-center">
                 <Zap size={16} />
               </div>
@@ -148,7 +148,7 @@ export default function AdminOverviewPage() {
         </div>
 
         {/* Integration Health Grid */}
-        <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs space-y-4">
+        <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E1E2ED] shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Server size={18} className="text-[#004AC6]" />
@@ -156,8 +156,8 @@ export default function AdminOverviewPage() {
                 External Integration &amp; API Health
               </h2>
             </div>
-            <span className="text-[12px] font-mono text-[#71717A]">
-              7 endpoints monitored
+            <span className="text-[11px] font-mono text-[#71717A]">
+              7 endpoints active
             </span>
           </div>
 
@@ -167,7 +167,7 @@ export default function AdminOverviewPage() {
               return (
                 <div
                   key={integration.name}
-                  className="p-4 rounded-2xl border border-[#E1E2ED] bg-[#FAF8FF] flex flex-col justify-between gap-2"
+                  className="p-4 rounded-2xl border border-[#E1E2ED] bg-[#FAF8FF] flex flex-col justify-between gap-2 shadow-xs"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -191,8 +191,8 @@ export default function AdminOverviewPage() {
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] text-[#71717A] pt-2 border-t border-[#E1E2ED]">
-                    <span>Latency: {integration.latencyMs}ms</span>
-                    <span>Uptime: {integration.uptimePercent}%</span>
+                    <span>Latency: <strong className="font-mono text-[#18181B]">{integration.latencyMs}ms</strong></span>
+                    <span>Uptime: <strong className="font-mono text-[#18181B]">{integration.uptimePercent}%</strong></span>
                   </div>
                 </div>
               )
@@ -201,7 +201,7 @@ export default function AdminOverviewPage() {
         </div>
 
         {/* Tamper-Evident Audit Log */}
-        <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs space-y-4">
+        <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E1E2ED] shadow-xs space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <ScrollText size={18} className="text-[#004AC6]" />

@@ -46,9 +46,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
             )
           })}
         </nav>
-        <div className="px-5 py-4 border-t border-[var(--color-border)]">
-          <button onClick={logout} className="flex items-center gap-2 text-[13px] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
-            <LogOut size={14} /> Logout
+        <div className="px-5 py-4 border-t border-[var(--color-border)] space-y-2">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-[12px] font-medium text-[#71717A] hover:text-[#004AC6] transition-colors"
+          >
+            ← Return to Homepage
+          </Link>
+          <button onClick={logout} className="flex items-center gap-2 text-[12px] text-[#DC2626] hover:underline transition-colors">
+            <LogOut size={13} /> Logout
           </button>
         </div>
       </aside>

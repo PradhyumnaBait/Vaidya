@@ -142,10 +142,10 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
 
             <button
               onClick={handleStaffLogin}
-              className="px-3.5 py-1.5 rounded-xl text-[13px] font-bold text-[#52525B] hover:text-[#18181B] hover:bg-[#F4F4F5] transition-all flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-xl text-[13px] font-bold text-[#52525B] hover:text-[#004AC6] hover:bg-[#EFF6FF] transition-all flex items-center gap-1.5"
             >
               <ShieldCheck size={16} className="text-[#004AC6]" />
-              <span>Login</span>
+              <span>Clinical Login</span>
             </button>
 
             <button
@@ -190,7 +190,7 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
               <div className="flex flex-wrap items-center gap-3 pt-2">
                 <button
                   onClick={handleLaunchKiosk}
-                  className="px-6 py-3.5 rounded-2xl bg-[#004AC6] hover:bg-[#003EA8] text-white text-[15px] font-bold shadow-sm hover:shadow transition-all flex items-center gap-2 active:scale-98"
+                  className="px-6 py-3.5 rounded-2xl bg-[#004AC6] hover:bg-[#003EA8] text-white text-[15px] font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-98"
                 >
                   <span>Begin Patient Intake</span>
                   <ArrowRight size={16} />
@@ -206,9 +206,10 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
 
                 <button
                   onClick={handleStaffLogin}
-                  className="px-4 py-3.5 text-[14px] font-bold text-[#71717A] hover:text-[#18181B] transition-colors"
+                  className="px-4 py-3.5 text-[14px] font-bold text-[#52525B] hover:text-[#004AC6] transition-colors flex items-center gap-1"
                 >
-                  Staff Login →
+                  <span>Clinical Login</span>
+                  <ArrowRight size={14} />
                 </button>
               </div>
 
@@ -229,11 +230,23 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
               </div>
             </div>
 
-            {/* Right Column: Layered Clinical Intelligence Product Mockup */}
+            {/* Right Column: Layered 3D Clinical Intelligence Product Mockup */}
             <div className="lg:col-span-6 relative">
               <div className="relative mx-auto w-full max-w-lg space-y-4">
+                {/* Floating 3D Badge 1: Physician Verified */}
+                <div className="absolute -top-4 -right-3 z-30 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-[#BBF7D0] shadow-md flex items-center gap-2 text-[11px] font-bold text-[#166534] animate-bounce-subtle">
+                  <CheckCircle2 size={14} className="text-[#16A34A]" />
+                  <span>PHYSICIAN VERIFIED</span>
+                </div>
+
+                {/* Floating 3D Badge 2: ABHA Linked */}
+                <div className="absolute -bottom-3 -left-3 z-30 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-[#BFDBFE] shadow-md flex items-center gap-2 text-[11px] font-bold text-[#1E40AF]">
+                  <span className="w-2 h-2 rounded-full bg-[#004AC6] animate-pulse" />
+                  <span>ABHA LINKED • 12-3456-7890-1234</span>
+                </div>
+
                 {/* Top Card: Live Patient Token & Kiosk Intake */}
-                <div className="bg-white rounded-3xl p-5 border border-[#E1E2ED] shadow-sm transform hover:-translate-y-1 transition-all duration-300">
+                <div className="bg-white rounded-3xl p-5 border border-[#E1E2ED] shadow-sm transform hover:-translate-y-1 transition-all duration-300 relative z-20">
                   <div className="flex items-center justify-between pb-3 border-b border-[#E1E2ED]">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-[#004AC6]/10 text-[#004AC6] flex flex-col items-center justify-center font-mono">
@@ -250,54 +263,53 @@ export default function Welcome({ onNavigate }: WelcomeProps) {
                     </span>
                   </div>
 
-                  <div className="mt-3 space-y-2 text-[12px]">
-                    <div className="p-2.5 rounded-xl bg-[#FAF8FF] border border-[#E1E2ED]">
-                      <span className="text-[10px] font-bold uppercase text-[#71717A] block">Voice Transcript (Bhashini ASR)</span>
-                      <p className="text-[13px] font-medium text-[#18181B] italic mt-0.5">
-                        &quot;३ महिन्यांपासून जेवणानंतर पोटात तीव्र जळजळ आणि दुखणे जाणवते...&quot;
-                      </p>
+                  <div className="pt-3 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] text-[#71717A]">
+                      <span className="flex items-center gap-1 text-[#004AC6] font-semibold">
+                        <Mic size={12} />
+                        <span>Marathi Voice Intake Transcript</span>
+                      </span>
+                      <span className="font-mono">10:28 AM</span>
                     </div>
+                    <p className="text-[13px] text-[#18181B] italic bg-[#FAF8FF] p-3 rounded-2xl border border-[#E1E2ED]">
+                      &quot;३ महिन्यांपासून जेवणानंतर पोटात तीव्र जळजळ आणि दुखणे जाणवते...&quot;
+                    </p>
                   </div>
                 </div>
 
-                {/* Middle Card: AI-Assisted Clinical Brief */}
-                <div className="bg-white rounded-3xl p-5 border-2 border-[#004AC6]/30 shadow-md transform hover:-translate-y-1 transition-all duration-300 relative z-10">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#E1E2ED]">
+                {/* Middle Card: AI-Assisted Clinical Summary Brief */}
+                <div className="bg-[#FAF8FF] rounded-3xl p-5 border border-[#004AC6]/30 shadow-md transform hover:-translate-y-1 transition-all duration-300 relative z-10 space-y-3">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-[#004AC6]">
                       <Sparkles size={16} />
-                      <span className="text-[13px] font-bold uppercase tracking-wider">
-                        AI-Assisted Clinical Summary
+                      <span className="text-[12px] font-bold uppercase tracking-wider">
+                        AI-ASSISTED CLINICAL SUMMARY
                       </span>
                     </div>
-                    <span className="text-[10px] font-mono text-[#71717A]">
+                    <span className="text-[10px] font-bold uppercase text-[#004AC6] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#BFDBFE]">
                       Physician Review Required
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mt-3 text-[12px]">
-                    <div className="bg-[#FAF8FF] p-3 rounded-xl border border-[#E1E2ED]">
-                      <span className="text-[10px] font-bold uppercase text-[#71717A] block">Chief Complaint</span>
-                      <p className="text-[13px] font-bold text-[#18181B] mt-0.5">Epigastric burning pain</p>
-                      <span className="text-[10px] font-mono text-[#004AC6]">Marathi Voice Input</span>
+                  <div className="grid grid-cols-2 gap-2 text-[12px]">
+                    <div className="bg-white p-2.5 rounded-xl border border-[#E1E2ED]">
+                      <span className="text-[10px] font-bold text-[#71717A] uppercase block">Chief Complaint</span>
+                      <strong className="text-[#18181B]">Epigastric burning pain</strong>
                     </div>
-                    <div className="bg-[#FAF8FF] p-3 rounded-xl border border-[#E1E2ED]">
-                      <span className="text-[10px] font-bold uppercase text-[#006A61] block">AYUSH Ahara Correlation</span>
-                      <p className="text-[12px] font-semibold text-[#18181B] mt-0.5">Irregular spicy food timing</p>
-                      <span className="text-[10px] font-mono text-[#006A61]">Lifestyle Trigger</span>
+                    <div className="bg-white p-2.5 rounded-xl border border-[#E1E2ED]">
+                      <span className="text-[10px] font-bold text-[#71717A] uppercase block">Duration</span>
+                      <strong className="text-[#18181B]">3 months duration</strong>
                     </div>
                   </div>
 
-                  {/* Scanned Document Evidence Crop */}
-                  <div className="mt-3 p-3 rounded-xl bg-[#FAF8FF] border border-[#E1E2ED] flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <FileText size={16} className="text-[#004AC6]" />
-                      <div>
-                        <p className="text-[12px] font-bold text-[#18181B]">Prescription_Jan2025.jpg</p>
-                        <p className="text-[10px] text-[#71717A]">Tab. Metformin 500mg BID • 94% OCR Confidence</p>
-                      </div>
+                  {/* Optical Document Preview & Confidence */}
+                  <div className="p-3 bg-white rounded-2xl border border-[#E1E2ED] flex items-center justify-between text-[12px]">
+                    <div className="flex items-center gap-2">
+                      <FileText size={15} className="text-[#004AC6]" />
+                      <span className="font-semibold text-[#18181B]">Prescription_Jan2025.jpg</span>
                     </div>
-                    <span className="text-[10px] font-bold text-[#166534] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
-                      Optical Proof
+                    <span className="text-[10px] font-mono font-bold text-[#166534] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
+                      94% OCR CONFIDENCE
                     </span>
                   </div>
                 </div>

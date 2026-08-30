@@ -44,7 +44,7 @@ export default function PatientDashboardPage() {
             </Link>
             <div className="h-4 w-px bg-[#E1E2ED] hidden sm:block" />
             <span className="hidden sm:inline-block text-[11px] font-bold uppercase tracking-wider text-[#006A61] bg-[#F0FDF4] px-2.5 py-0.5 rounded-full border border-[#BBF7D0]">
-              My Health Record
+              Patient Portal
             </span>
           </div>
 
@@ -73,7 +73,7 @@ export default function PatientDashboardPage() {
 
       {/* ─── Main Content Container ────────────────────────────────── */}
       <main className="max-w-6xl mx-auto px-5 md:px-8 py-8 w-full flex-1 flex flex-col gap-8">
-        {/* Patient Identity Banner */}
+        {/* Patient Greeting & Identity Banner */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E1E2ED] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 rounded-2xl bg-[#006A61] text-white flex items-center justify-center font-bold text-xl shrink-0 shadow-sm shadow-teal-500/20">
@@ -82,34 +82,34 @@ export default function PatientDashboardPage() {
             <div className="space-y-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-[24px] sm:text-[28px] font-bold text-[#18181B] tracking-tight">
-                  {patient.name}
+                  Good morning, Dhananjay
                 </h1>
                 <span className="bg-[#F0FDF4] text-[#166534] border border-[#BBF7D0] px-2.5 py-0.5 rounded-full text-[11px] font-bold">
                   ● ABHA Linked
                 </span>
               </div>
-              <p className="text-[13px] text-[#71717A]">
-                {patient.age} years old • Male • Preferred Language: Marathi (मराठी)
+              <p className="text-[14px] text-[#52525B]">
+                Your health information is organized here.
               </p>
-              <p className="text-[12px] font-mono text-[#004AC6] pt-1">
-                ABHA Number: {patient.abhaNumber}
+              <p className="text-[12px] font-mono text-[#004AC6] pt-0.5">
+                ABHA: {patient.abhaNumber} • 67 years • Male
               </p>
             </div>
           </div>
 
-          {/* Quick Stats Pill */}
+          {/* Quick Overview Pill */}
           <div className="flex items-center gap-3 self-start md:self-auto bg-[#FAF8FF] p-3 rounded-2xl border border-[#E1E2ED]">
             <div className="text-center px-3 border-r border-[#E1E2ED]">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">Records</p>
-              <p className="text-[18px] font-extrabold text-[#18181B] font-mono">3</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">Today&apos;s Token</p>
+              <p className="text-[18px] font-extrabold text-[#004AC6] font-mono">A-028</p>
             </div>
             <div className="text-center px-3 border-r border-[#E1E2ED]">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">Medicines</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">Medicines</p>
               <p className="text-[18px] font-extrabold text-[#18181B] font-mono">2</p>
             </div>
             <div className="text-center px-3">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">OPD Token</p>
-              <p className="text-[18px] font-extrabold text-[#004AC6] font-mono">A-028</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">Documents</p>
+              <p className="text-[18px] font-extrabold text-[#18181B] font-mono">3</p>
             </div>
           </div>
         </div>
@@ -117,10 +117,10 @@ export default function PatientDashboardPage() {
         {/* Navigation Tabs */}
         <div className="flex items-center gap-2 border-b border-[#E1E2ED] pb-3 overflow-x-auto">
           {[
-            { id: 'OVERVIEW', label: 'Overview & Today’s Visit' },
-            { id: 'PRESCRIPTIONS', label: 'Active Prescriptions (2)' },
-            { id: 'DOCUMENTS', label: 'Scanned Records (3)' },
-            { id: 'TIMELINE', label: 'Health Journey Timeline' },
+            { id: 'OVERVIEW', label: 'Today’s Visit' },
+            { id: 'PRESCRIPTIONS', label: 'Prescriptions (2)' },
+            { id: 'DOCUMENTS', label: 'Medical Documents (3)' },
+            { id: 'TIMELINE', label: 'Health Journey' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -136,7 +136,7 @@ export default function PatientDashboardPage() {
           ))}
         </div>
 
-        {/* Tab 1: Overview & Today's Visit */}
+        {/* Tab 1: Today's Visit */}
         {activeTab === 'OVERVIEW' && (
           <div className="space-y-6">
             {/* Live OPD Visit Status Card */}
@@ -148,25 +148,25 @@ export default function PatientDashboardPage() {
                     <span className="text-[16px] font-extrabold leading-none">A-028</span>
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#004AC6] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#BFDBFE]">
-                      Today&apos;s Active Consultation
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#004AC6] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#BFDBFE]">
+                      Active OPD Consultation
                     </span>
-                    <h2 className="text-[17px] font-bold text-[#18181B] mt-1">
-                      Internal Medicine OPD Consultation
+                    <h2 className="text-[18px] font-bold text-[#18181B] mt-1">
+                      Internal Medicine Consultation
                     </h2>
                   </div>
                 </div>
 
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-bold bg-[#F0FDF4] text-[#166534] border border-[#BBF7D0] self-start sm:self-auto">
                   <span className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse" />
-                  Intake Prepared • Physician Review Active
+                  Prepared by VAIDYA • Under Physician Review
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-[13px]">
                 <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED]">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">
-                    Chief Complaint Logged
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
+                    Chief Complaint Recorded
                   </span>
                   <p className="text-[14px] font-bold text-[#18181B] mt-1">
                     Epigastric pain, 3 months duration
@@ -177,7 +177,7 @@ export default function PatientDashboardPage() {
                 </div>
 
                 <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED]">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
                     Hospital Department
                   </span>
                   <p className="text-[14px] font-bold text-[#18181B] mt-1">
@@ -189,20 +189,20 @@ export default function PatientDashboardPage() {
                 </div>
 
                 <div className="bg-[#FAF8FF] p-4 rounded-2xl border border-[#E1E2ED]">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#71717A]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#71717A]">
                     Attached Records
                   </span>
                   <p className="text-[14px] font-bold text-[#18181B] mt-1">
-                    3 physical records scanned
+                    3 physical files scanned
                   </p>
                   <p className="text-[11px] text-[#16A34A] font-semibold mt-1">
-                    ✓ Digitized &amp; OCR analyzed
+                    ✓ Optical OCR verified
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Quick Overview Grid: Medications + Scanned Docs */}
+            {/* Quick Overviews */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Prescriptions Preview */}
               <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs space-y-4">
@@ -223,9 +223,9 @@ export default function PatientDashboardPage() {
                   <div className="p-3.5 rounded-2xl bg-[#FAF8FF] border border-[#E1E2ED] flex items-center justify-between">
                     <div>
                       <p className="text-[14px] font-bold text-[#18181B]">Tab. Metformin 500 mg</p>
-                      <p className="text-[12px] text-[#71717A]">Twice daily with meals (BID) • Diabetes</p>
+                      <p className="text-[12px] text-[#71717A]">Twice daily with meals (BID) • AIIMS Delhi</p>
                     </div>
-                    <span className="text-[11px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
+                    <span className="text-[10px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
                       Active
                     </span>
                   </div>
@@ -233,21 +233,21 @@ export default function PatientDashboardPage() {
                   <div className="p-3.5 rounded-2xl bg-[#FAF8FF] border border-[#E1E2ED] flex items-center justify-between">
                     <div>
                       <p className="text-[14px] font-bold text-[#18181B]">Tab. Amlodipine 5 mg</p>
-                      <p className="text-[12px] text-[#71717A]">Once daily morning (OD) • Hypertension</p>
+                      <p className="text-[12px] text-[#71717A]">Once daily morning (OD) • AIIMS Delhi</p>
                     </div>
-                    <span className="text-[11px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
+                    <span className="text-[10px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
                       Active
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Scanned Records Preview */}
+              {/* Scanned Documents Preview */}
               <div className="bg-white rounded-3xl p-6 border border-[#E1E2ED] shadow-xs space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-[16px] font-bold text-[#18181B] flex items-center gap-2">
                     <FileText size={18} className="text-[#006A61]" />
-                    <span>My Scanned Records</span>
+                    <span>Scanned Documents</span>
                   </h3>
                   <button
                     onClick={() => setActiveTab('DOCUMENTS')}
@@ -281,52 +281,89 @@ export default function PatientDashboardPage() {
           </div>
         )}
 
-        {/* Tab 2: Active Prescriptions */}
+        {/* Tab 2: Prescriptions */}
         {activeTab === 'PRESCRIPTIONS' && (
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E1E2ED] shadow-xs space-y-6">
-            <div>
-              <h2 className="text-[20px] font-bold text-[#18181B]">
-                Prescription History &amp; Current Medications
-              </h2>
-              <p className="text-[13px] text-[#71717A] mt-0.5">
-                Digitized from previous consultation slips and hospital discharge records.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E1E2ED]">
+              <div>
+                <h2 className="text-[20px] font-bold text-[#18181B]">
+                  Prescriptions &amp; Medications
+                </h2>
+                <p className="text-[13px] text-[#71717A] mt-0.5">
+                  Prescribed medications digitized and linked to your ABHA health profile.
+                </p>
+              </div>
+
+              <span className="text-[11px] font-bold text-[#166534] bg-[#F0FDF4] px-3 py-1 rounded-full border border-[#BBF7D0] self-start sm:self-auto">
+                ● Synced to ABHA Health Locker
+              </span>
             </div>
 
-            <div className="space-y-4">
-              <div className="p-5 rounded-2xl border border-[#E1E2ED] bg-[#FAF8FF] space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#004AC6] bg-[#EFF6FF] px-2.5 py-0.5 rounded border border-[#BFDBFE]">
-                    Prescribed at AIIMS Delhi
-                  </span>
-                  <span className="text-[12px] font-mono text-[#71717A]">Jan 15, 2025</span>
+            {/* Today's OPD Prescription Banner */}
+            <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#004AC6] bg-white px-2.5 py-0.5 rounded border border-[#BFDBFE]">
+                  Today&apos;s OPD Consultation • Dr. Sunita Rao
+                </span>
+                <span className="text-[12px] font-mono text-[#004AC6]">31 Aug 2026</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="bg-white p-4 rounded-xl border border-[#BFDBFE] space-y-1">
+                  <p className="font-bold text-[#18181B] text-[14px]">Tab. Pantoprazole 40mg</p>
+                  <p className="text-[12px] text-[#52525B]">1 Tablet • Once daily before breakfast (OD) • 14 days</p>
+                  <p className="text-[11px] text-[#004AC6] font-semibold">For: Acid Peptic Disease / Epigastric burning</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                  <div className="bg-white p-4 rounded-xl border border-[#E1E2ED]">
-                    <h4 className="text-[15px] font-bold text-[#18181B]">Tab. Metformin 500mg</h4>
-                    <p className="text-[13px] text-[#71717A] mt-1">Dosage: 1 tablet twice daily after meals (BID)</p>
-                    <p className="text-[12px] text-[#16A34A] font-semibold mt-2">Indication: Type 2 Diabetes</p>
+
+                <div className="bg-white p-4 rounded-xl border border-[#BFDBFE] space-y-1">
+                  <p className="font-bold text-[#18181B] text-[14px]">Syrup Sucralfate 10ml</p>
+                  <p className="text-[12px] text-[#52525B]">2 Teaspoons • Three times daily after meals (TDS) • 7 days</p>
+                  <p className="text-[11px] text-[#004AC6] font-semibold">For: Gastric mucosal protection</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Ongoing Chronic Prescriptions */}
+            <div>
+              <h3 className="text-[15px] font-bold text-[#18181B] mb-3">Ongoing Long-term Prescriptions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-[#FAF8FF] p-5 rounded-2xl border border-[#E1E2ED] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#004AC6] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#BFDBFE]">
+                      Diabetes Mellitus
+                    </span>
+                    <span className="text-[12px] font-mono text-[#71717A]">AIIMS Delhi</span>
                   </div>
-                  <div className="bg-white p-4 rounded-xl border border-[#E1E2ED]">
-                    <h4 className="text-[15px] font-bold text-[#18181B]">Tab. Amlodipine 5mg</h4>
-                    <p className="text-[13px] text-[#71717A] mt-1">Dosage: 1 tablet once daily morning (OD)</p>
-                    <p className="text-[12px] text-[#16A34A] font-semibold mt-2">Indication: Hypertension</p>
+                  <h4 className="text-[16px] font-bold text-[#18181B]">Tab. Metformin 500mg</h4>
+                  <p className="text-[13px] text-[#52525B]">Dosage: 1 tablet twice daily after meals (BID)</p>
+                  <p className="text-[11px] text-[#16A34A] font-semibold pt-1">✓ Active Medication</p>
+                </div>
+
+                <div className="bg-[#FAF8FF] p-5 rounded-2xl border border-[#E1E2ED] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#004AC6] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#BFDBFE]">
+                      Hypertension
+                    </span>
+                    <span className="text-[12px] font-mono text-[#71717A]">AIIMS Delhi</span>
                   </div>
+                  <h4 className="text-[16px] font-bold text-[#18181B]">Tab. Amlodipine 5mg</h4>
+                  <p className="text-[13px] text-[#52525B]">Dosage: 1 tablet once daily morning (OD)</p>
+                  <p className="text-[11px] text-[#16A34A] font-semibold pt-1">✓ Active Medication</p>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Tab 3: Scanned Records */}
+        {/* Tab 3: Medical Documents */}
         {activeTab === 'DOCUMENTS' && (
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E1E2ED] shadow-xs space-y-6">
             <div>
               <h2 className="text-[20px] font-bold text-[#18181B]">
-                Scanned Clinical Documents
+                Scanned Medical Documents
               </h2>
               <p className="text-[13px] text-[#71717A] mt-0.5">
-                Physical medical files scanned and processed into your digital ABHA record.
+                Physical medical files scanned and processed into your digital health record.
               </p>
             </div>
 
@@ -335,14 +372,14 @@ export default function PatientDashboardPage() {
                 <div
                   key={doc.id}
                   onClick={() => setSelectedDoc(doc)}
-                  className="p-5 rounded-2xl border border-[#E1E2ED] bg-[#FAF8FF] hover:border-[#004AC6] transition-all cursor-pointer flex flex-col justify-between gap-4 group"
+                  className="p-5 rounded-2xl border border-[#E1E2ED] bg-[#FAF8FF] hover:border-[#004AC6] transition-all cursor-pointer flex flex-col justify-between gap-4 group shadow-xs"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-[#EFF6FF] text-[#004AC6] px-2 py-0.5 rounded">
+                      <span className="text-[9px] font-bold uppercase tracking-wider bg-[#EFF6FF] text-[#004AC6] px-2 py-0.5 rounded">
                         {doc.documentType.replace(/_/g, ' ')}
                       </span>
-                      <span className="text-[11px] font-mono text-[#166534] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
+                      <span className="text-[10px] font-mono text-[#166534] bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
                         {Math.round((doc.ocrConfidence || 0.9) * 100)}% OCR
                       </span>
                     </div>
@@ -369,10 +406,10 @@ export default function PatientDashboardPage() {
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E1E2ED] shadow-xs space-y-6">
             <div>
               <h2 className="text-[20px] font-bold text-[#18181B]">
-                Reconstructed Health Journey
+                Longitudinal Health Journey
               </h2>
               <p className="text-[13px] text-[#71717A] mt-0.5">
-                Longitudinal record merging your past medical reports with today&apos;s hospital intake.
+                Chronological health timeline merging past hospital records with today&apos;s intake.
               </p>
             </div>
 
@@ -408,7 +445,7 @@ export default function PatientDashboardPage() {
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full border border-[#E1E2ED] shadow-xl space-y-4 animate-scale-in">
             <div className="flex items-center justify-between border-b border-[#E1E2ED] pb-3">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#004AC6] bg-[#EFF6FF] px-2 py-0.5 rounded">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-[#004AC6] bg-[#EFF6FF] px-2 py-0.5 rounded">
                   {selectedDoc.documentType.replace(/_/g, ' ')}
                 </span>
                 <h3 className="text-[17px] font-bold text-[#18181B] mt-1">
@@ -428,7 +465,7 @@ export default function PatientDashboardPage() {
                 <div className="flex justify-between">
                   <span className="text-[#71717A]">Digitization Quality:</span>
                   <span className="font-bold text-[#166534]">
-                    {Math.round((selectedDoc.ocrConfidence || 0.9) * 100)}% Confidence
+                    {Math.round((selectedDoc.ocrConfidence || 0.9) * 100)}% Accuracy
                   </span>
                 </div>
                 <div className="flex justify-between">

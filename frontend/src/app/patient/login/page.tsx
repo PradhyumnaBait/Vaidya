@@ -238,7 +238,7 @@ export default function PatientLoginPage() {
       <div className="text-center text-[12px] text-[#71717A]">
         <span>Need clinical staff access? </span>
         <Link href="/auth/login" className="text-[#004AC6] font-bold hover:underline">
-          Staff Login →
+          Clinical Login →
         </Link>
       </div>
     </div>
