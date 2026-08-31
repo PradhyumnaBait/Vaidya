@@ -1,6 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 
+@font-face {
+  font-family: 'hankenGrotesk';
+  src: local('Hanken Grotesk'), local('HankenGrotesk');
+}
+@font-face {
+  font-family: 'plusJakartaSans';
+  src: local('Plus Jakarta Sans'), local('PlusJakartaSans');
+}
+@font-face {
+  font-family: 'jetbrainsMono';
+  src: local('JetBrains Mono'), local('JetBrainsMono');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
