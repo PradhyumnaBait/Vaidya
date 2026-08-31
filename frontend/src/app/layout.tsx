@@ -1,6 +1,4 @@
 import type { Metadata } from 'next'
-import '@fontsource-variable/hanken-grotesk'
-import '@fontsource-variable/plus-jakarta-sans'
 import '@/styles/globals.css'
 import { Providers } from './providers'
 
