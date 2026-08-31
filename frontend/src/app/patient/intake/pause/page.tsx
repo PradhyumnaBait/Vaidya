@@ -9,7 +9,7 @@ export default function IntakePausePage() {
   const { reset } = useIntakeStore()
 
   const handleContinue = () => {
-    router.push('/patient/documents')
+    router.push('/patient/intake/progress')
   }
 
   const handleStartOver = () => {

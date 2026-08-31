@@ -7,11 +7,11 @@ export default function AyushIntroPage() {
   const router = useRouter()
 
   const handleContinue = () => {
-    router.push('/patient/documents')
+    router.push('/patient/intake/ayush-question')
   }
 
   const handleSkip = () => {
-    router.push('/patient/documents')
+    router.push('/patient/intake/progress')
   }
 
   return (

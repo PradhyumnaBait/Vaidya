@@ -29,7 +29,7 @@ export default function AyushQuestionPage() {
       timestamp: new Date().toISOString(),
     })
 
-    router.push('/patient/documents')
+    router.push('/patient/intake/progress')
   }
 
   const handlePrevious = () => {
