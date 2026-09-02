@@ -1,0 +1,15 @@
+{
+  "name": "vaidya",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VAIDYA - Patient Case-Taking Software (SIH 2026 / SIH26047)",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "dev:main": "npm --prefix frontend run dev:main",
+    "dev:kiosk": "npm --prefix frontend run dev:kiosk",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
+    "lint": "npm --prefix frontend run lint",
+    "test": "npm --prefix frontend run test"
+  }
+}
